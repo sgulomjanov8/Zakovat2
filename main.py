@@ -10,7 +10,7 @@ from groq import Groq
 logging.basicConfig(level=logging.INFO)
 
 # 1. API Kalitlar va Bot/Dispatcher e'lon qilish (Bular eng tepada bo'lishi SHART)
-BOT_TOKEN = os.getenv("BOT_TOKEN", "TELEGRAM_BOT_TOKENINGIZNI_SHUYERGA_YOZING")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAFAZIWW0kRKnj7cXL3mSkzkwVww5cB_V-E")
 GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY", "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"
 )
