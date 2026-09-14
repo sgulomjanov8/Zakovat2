@@ -1,10 +1,26 @@
+import asyncio
+import logging
+import os
+import random
+from aiogram import Bot, Dispatcher, F, types
+from aiogram.filters import Command
 from groq import Groq
 
-# Groq API mijozini rejimga tushirish
-GROQ_API_KEY = "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"
+# Loggingni sozlash
+logging.basicConfig(level=logging.INFO)
+
+# 1. API Kalitlar va Bot/Dispatcher e'lon qilish (Bular eng tepada bo'lishi SHART)
+BOT_TOKEN = os.getenv("BOT_TOKEN", "TELEGRAM_BOT_TOKENINGIZNI_SHUYERGA_YOZING")
+GROQ_API_KEY = os.getenv(
+    "GROQ_API_KEY", "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"
+)
+
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 
+# 2. Groq AI funksiyasi
 def format_rules_with_groq(text: str) -> str:
     """Groq API orqali qoidalar matnini tozalash va chiroyli shaklga keltirish funksiyasi"""
     try:
@@ -26,6 +42,7 @@ def format_rules_with_groq(text: str) -> str:
         return text
 
 
+# 3. Handlerlar va O'yin logikasi
 @dp.message(F.text == "🚀 O'yinni Boshlash")
 @dp.message(Command("startgame"))
 async def start_game(message: types.Message):
