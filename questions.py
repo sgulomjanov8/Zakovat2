@@ -1,1447 +1,758 @@
+# questions.py
+# Bu yerga minglab savollarni har biriga alohida 'id' bergan holda qo'shib borasiz.
+
 LOGICAL_QUESTIONS = [
     {
         "id": 1,
-        "q": "Savol matni...",
-        "a": ["javob"],
-        "hint": "Maslahat...",
-        "image": "https://..."
+        "q": "1. Bir kishi yomg'irda soyabonsiz va kalta shlyapasiz yurgan bo'lsa ham, birorta sochi ho'l bo'lmadi. Bu qanday bo'lishi mumkin?",
+        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
+        "hint": "💡 Maslahat: Insonning boshida sochi bo'lmasligi ham mumkin.",
+        "a": ["kal", "u kal", "sochi yo'q"]
     },
-    # qolgan savollar...
+    {
+        "id": 2,
+        "q": "2. Qaysi oyda odamlar eng kam uxlashadi?",
+        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+        "hint": "💡 Maslahat: Bu oyda kunlar soni boshqalariga qaraganda kamroq.",
+        "a": ["fevral", "fevral oyida"]
+    },
+    {
+        "id": 3,
+        "q": "3. Tunda qorong'i xonada qora mushuk o'tiribdi. Qora ko'zoynak taqqan haydovchi uni qanday qilib darrov ko'rib qoldi?",
+        "image": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800",
+        "hint": "💡 Maslahat: Xona qorong'i bo'lsa ham, ko'chada vaqt boshqacha bo'lishi mumkin.",
+        "a": ["kunduzi", "kun duzi", "kun edi", "kunduzi edi"]
+    },
+    {
+        "id": 4,
+        "q": "4. Uni qanchalik ko'p olsangiz, uning hajmi shunchalik kattalashib boraveradi. U nima?",
+        "image": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800",
+        "hint": "💡 Maslahat: Yer ostidagi yoki devordagi bo'shliq.",
+        "a": ["chuqur", "chuqurcha", "o'ra"]
+    },
+    {
+        "id": 5,
+        "q": "5. Siz uni ushlay olmaysiz, lekin u doim siz bilan birga yuradi va faqat qorong'ida yo'qoladi. U nima?",
+        "image": "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800",
+        "hint": "💡 Maslahat: Yorug'lik tushganda yerda hosil bo'ladi.",
+        "a": ["soya", "soyasi"]
+    },
+    {
+        "id": 6,
+        "q": "6. Suv ostida qaysi ko'zoynak bilan ham biror narsa ko'rib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+        "hint": "💡 Maslahat: Suv ostida hamma joy qorong'i yoki ko'z yumuq bo'lishi mumkin.",
+        "a": ["qorong'ida", "ko'z yumilganda", "yumuq ko'z"]
+    },
+    {
+        "id": 7,
+        "q": "7. Qaysi idishdan biror narsa yeb bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800",
+        "hint": "💡 Maslahat: Bu idish bo'sh yoki teshik bo'lishi mumkin.",
+        "a": ["bo'sh idish", "bo'sh", "teshik idish"]
+    }
 ]
 
-    # =========================
-    # 8-27 | ODDIY MANTIQ
-    # =========================
-
+# 8-107: Yangi 100 ta mantiqiy savol
+LOGICAL_QUESTIONS += [
     {
         "id": 8,
-        "q": "8. 5 ta olmaning 2 tasini oldingiz. Sizda nechta olma bor?",
+        "q": "8. Stol ustida 3 ta olma bor edi. Siz 2 tasini oldingiz. Sizda nechta olma bor?",
         "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Siz olgan olmalarni hisoblang.",
-        "a": ["2", "2 ta", "ikkita"]
+        "hint": "💡 Maslahat: Siz olgan olmalarni hisoblang.",
+        "a": ["2 ta", "2", "ikkita"]
     },
     {
         "id": 9,
-        "q": "9. 10 ta sham yonib turibdi. 3 tasi o'chdi. Nechta sham qoldi?",
+        "q": "9. Bir xonada 5 ta sham yonib turibdi. 2 tasi o'chirildi. Xonada nechta sham qoldi?",
         "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
-        "hint": "💡 O'chgan shamlar ham joyida qoladi.",
-        "a": ["10", "10 ta", "o'nta"]
+        "hint": "💡 Maslahat: O'chirilgan shamlar ham xonada qoladi.",
+        "a": ["5 ta", "5", "beshta"]
     },
     {
         "id": 10,
-        "q": "10. Daraxtda 8 ta qush bor edi. 3 tasi uchib ketdi. Nechta qoldi?",
+        "q": "10. Daraxtda 10 ta qush o'tirgan edi. Ovchi bittasini otdi. Daraxtda nechta qush qoldi?",
         "image": "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=800",
-        "hint": "💡 Uchib ketganlarini ayiring.",
-        "a": ["5", "5 ta", "beshta"]
+        "hint": "💡 Maslahat: O'q ovozidan keyin qolgan qushlar nima qiladi?",
+        "a": ["0 ta", "0", "hech biri", "bironta ham"]
     },
     {
         "id": 11,
-        "q": "11. Bir kilogramm temir va bir kilogramm paxtadan qaysi biri og'ir?",
-        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
-        "hint": "💡 Ikkalasining massasi bir xil.",
-        "a": ["teng", "bir xil", "ikkalasi teng"]
+        "q": "11. Elektr poyezdi shimolga qarab ketmoqda. Uning tutuni qaysi tomonga ketadi?",
+        "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+        "hint": "💡 Maslahat: Elektr poyezdiga e'tibor bering.",
+        "a": ["tutuni yo'q", "tutun chiqmaydi", "hech qaysi tomonga"]
     },
     {
         "id": 12,
-        "q": "12. 3 ta mushuk 3 ta sichqonni 3 daqiqada tutadi. 1 ta mushuk 1 ta sichqonni necha daqiqada tutadi?",
-        "image": "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=800",
-        "hint": "💡 Har bir mushuk bir xil tezlikda ishlaydi.",
-        "a": ["3 daqiqa", "3", "uch daqiqa"]
+        "q": "12. Siz poygada ikkinchi o'rindagi odamni quvib o'tdingiz. Endi nechanchi o'rindasiz?",
+        "image": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800",
+        "hint": "💡 Maslahat: Siz kimning o'rnini egalladingiz?",
+        "a": ["2", "ikkinchi", "2-o'rin", "ikkinchi o'rin"]
     },
     {
         "id": 13,
-        "q": "13. 6 ta tuxumdan 2 tasi sindi. Nechta tuxum qoldi?",
-        "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
-        "hint": "💡 Siniq tuxum ham tuxum hisoblanadi.",
-        "a": ["6", "6 ta", "oltita"]
+        "q": "13. Poygada oxirgi odamni quvib o'tdingiz. Endi nechanchi o'rindasiz?",
+        "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800",
+        "hint": "💡 Maslahat: Oxirgi odamni quvib o'tish mumkinmi?",
+        "a": ["mumkin emas", "bo'lmaydi", "imkonsiz"]
     },
     {
         "id": 14,
-        "q": "14. 20 ta konfetning yarmini oldingiz. Nechta konfet oldingiz?",
-        "image": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?w=800",
-        "hint": "💡 20 ning yarmini toping.",
-        "a": ["10", "10 ta", "o'nta"]
+        "q": "14. Bir odam 10 qavatli binodan sakradi, ammo hech qanday jarohat olmadi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
+        "hint": "💡 Maslahat: U qayerdan sakraganiga e'tibor bering.",
+        "a": ["birinchi qavatdan", "1-qavatdan", "pastdan"]
     },
     {
         "id": 15,
-        "q": "15. 100 sonidan 10 ni ayirsangiz nechchi qoladi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Oddiy ayirish.",
-        "a": ["90", "90 ta", "to'qson"]
+        "q": "15. Qaysi narsa qurigani sari ho'l bo'lib boradi?",
+        "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800",
+        "hint": "💡 Maslahat: U bilan suvni artamiz.",
+        "a": ["sochiq", "sochiqni"]
     },
     {
         "id": 16,
-        "q": "16. 4 ta bola 4 daqiqada 4 ta olma yesa, 1 bola 1 ta olmani necha daqiqada yeydi?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Har bir bola bir xil tezlikda yeydi.",
-        "a": ["4 daqiqa", "4", "to'rt daqiqa"]
+        "q": "16. Qaysi narsa qancha ko'p ishlatilsa, shuncha qisqaradi?",
+        "image": "https://images.unsplash.com/photo-1603899122634-f086ca5f5ddd?w=800",
+        "hint": "💡 Maslahat: U yorug'lik beradi.",
+        "a": ["sham", "shamni"]
     },
     {
         "id": 17,
-        "q": "17. Bir haftada nechta kun bor?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Hafta kunlarini sanang.",
-        "a": ["7", "7 ta", "yetti"]
+        "q": "17. Qaysi narsa og'zi bor, lekin gapirmaydi?",
+        "image": "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?w=800",
+        "hint": "💡 Maslahat: U suv bilan bog'liq.",
+        "a": ["daryo", "daryoning og'zi"]
     },
     {
         "id": 18,
-        "q": "18. 2 ta qo'lda jami nechta barmoq bor?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Bir qo'lda nechta barmoq bor?",
-        "a": ["10", "10 ta", "o'nta"]
+        "q": "18. Qaysi narsa oyog'i bor, lekin yura olmaydi?",
+        "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
+        "hint": "💡 Maslahat: Uyda undan ko'p uchraydi.",
+        "a": ["stol", "stul", "mebel"]
     },
     {
         "id": 19,
-        "q": "19. 3 ta aka-ukaning har birida 2 tadan qalam bor. Jami nechta qalam?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 3 ni 2 ga ko'paytiring.",
-        "a": ["6", "6 ta", "oltita"]
+        "q": "19. Qaysi narsa qo'li bor, lekin hech narsani ushlay olmaydi?",
+        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
+        "hint": "💡 Maslahat: U vaqtni ko'rsatadi.",
+        "a": ["soat", "soatning qo'li", "soat strelkasi"]
     },
     {
         "id": 20,
-        "q": "20. 15 ta kitobdan 5 tasini do'stingizga berdingiz. Nechta qoldi?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 Berilgan kitoblarni ayiring.",
-        "a": ["10", "10 ta", "o'nta"]
+        "q": "20. Qaysi narsa ko'zi bor, lekin ko'ra olmaydi?",
+        "image": "https://images.unsplash.com/photo-1512758017271-d7b84c2113f1?w=800",
+        "hint": "💡 Maslahat: Tikishda undan foydalaniladi.",
+        "a": ["igna", "ignaning ko'zi"]
     },
     {
         "id": 21,
-        "q": "21. 7 + 8 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Sonlarni qo'shing.",
-        "a": ["15", "15 ta", "o'n besh"]
+        "q": "21. Qaysi narsa tishi bor, lekin tishlay olmaydi?",
+        "image": "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
+        "hint": "💡 Maslahat: Soch bilan ishlatiladi.",
+        "a": ["taroq", "soch taroq", "taroqning tishi"]
     },
     {
         "id": 22,
-        "q": "22. 20 - 7 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 20 dan 7 ni ayiring.",
-        "a": ["13", "13 ta", "o'n uch"]
+        "q": "22. Qaysi narsa qanotsiz uchadi?",
+        "image": "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800",
+        "hint": "💡 Maslahat: Uni osmonda ko'rish mumkin.",
+        "a": ["bulut", "bulutlar", "vaqt"]
     },
     {
         "id": 23,
-        "q": "23. 6 × 3 nechchi?",
-        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
-        "hint": "💡 6 ni 3 marta qo'shing.",
-        "a": ["18", "18 ta", "o'n sakkiz"]
+        "q": "23. Qaysi narsa qancha ko'paysa, shuncha kam ko'rasiz?",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        "hint": "💡 Maslahat: Yorug'likning teskarisini o'ylang.",
+        "a": ["qorong'ulik", "qorong'i", "zulmat", "qorong'ulik ko'payganda"]
     },
     {
         "id": 24,
-        "q": "24. 24 ÷ 6 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 24 ni 6 ga bo'ling.",
-        "a": ["4", "4 ta", "to'rt"]
+        "q": "24. Qaysi narsa sizniki, lekin uni boshqalar sizdan ko'proq ishlatadi?",
+        "image": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800",
+        "hint": "💡 Maslahat: Odamlar sizga murojaat qilganda aytadi.",
+        "a": ["ism", "ismingiz", "mening ismim"]
     },
     {
         "id": 25,
-        "q": "25. 50 ning yarmi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 50 ni 2 ga bo'ling.",
-        "a": ["25", "25 ta", "yigirma besh"]
+        "q": "25. Qaysi savolga hech qachon 'ha' deb javob bera olmaysiz?",
+        "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+        "hint": "💡 Maslahat: Oddiy holat haqida o'ylang.",
+        "a": ["uxlayapsanmi", "uxlayapsizmi", "uxlayotganmisan"]
     },
     {
         "id": 26,
-        "q": "26. 40 ning choragi nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 40 ni 4 ga bo'ling.",
-        "a": ["10", "10 ta", "o'n"]
+        "q": "26. Ertalab 4 oyoqda, tushda 2 oyoqda, kechqurun 3 oyoqda yuradigan narsa nima?",
+        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
+        "hint": "💡 Maslahat: Bu mashhur qadimiy topishmoq.",
+        "a": ["inson", "odam", "odamzod"]
     },
     {
         "id": 27,
-        "q": "27. 5 × 5 nechchi?",
-        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
-        "hint": "💡 5 ni 5 marta qo'shing.",
-        "a": ["25", "25 ta", "yigirma besh"]
+        "q": "27. Bir kilogramm temir og'irmi yoki bir kilogramm paxta?",
+        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
+        "hint": "💡 Maslahat: Ikkalasining massasini solishtiring.",
+        "a": ["teng", "bir xil", "ikkalasi teng"]
     },
-
-    # =========================
-    # 28-57 | SONLAR VA KETMA-KETLIK
-    # =========================
-
     {
         "id": 28,
-        "q": "28. 2, 4, 6, 8, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 2 qo'shilmoqda.",
-        "a": ["10", "10 ta", "o'n"]
+        "q": "28. Xonada 4 burchak bor. Har burchakda bittadan mushuk o'tiribdi. Har mushuk qarshisida 3 ta mushukni ko'rmoqda. Jami nechta mushuk bor?",
+        "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800",
+        "hint": "💡 Maslahat: Har burchakda bittadan mushuk bor.",
+        "a": ["4 ta", "4", "to'rtta"]
     },
     {
         "id": 29,
-        "q": "29. 5, 10, 15, 20, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 5 qo'shilmoqda.",
-        "a": ["25", "25 ta", "yigirma besh"]
+        "q": "29. 2 ta ota va 2 ta o'g'il baliq oviga bordi. Ular jami 3 ta baliq tutishdi va har biriga bittadan tegdi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1516707352573-1b1e2e8e1d4a?w=800",
+        "hint": "💡 Maslahat: Ular uch kishi bo'lishi mumkin.",
+        "a": ["bobo ota o'g'il", "bobo, ota va o'g'il", "3 kishi"]
     },
     {
         "id": 30,
-        "q": "30. 1, 3, 5, 7, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Toq sonlar ketma-ketligi.",
-        "a": ["9", "9 ta", "to'qqiz"]
+        "q": "30. Bir odam dushanba kuni shaharga keldi. U uch kun turib, dushanba kuni qaytib ketdi. Bu qanday mumkin?",
+        "image": "https://images.unsplash.com/photo-1494526585095-c41746248156?w=800",
+        "hint": "💡 Maslahat: 'Dushanba' faqat hafta kuni emas.",
+        "a": ["otining nomi dushanba", "otining nomi", "oti dushanba"]
     },
     {
         "id": 31,
-        "q": "31. 10, 20, 30, 40, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 10 qo'shilmoqda.",
-        "a": ["50", "50 ta", "ellik"]
+        "q": "31. 5 ta aka-uka bir xonada. Har birining o'z mashg'uloti bor: biri kitob o'qiydi, biri rasm chizadi, biri shaxmat o'ynaydi, biri ovqat pishiradi. Beshinchisi nima qiladi?",
+        "image": "https://images.unsplash.com/photo-1529068755536-a5ade0dcb4e8?w=800",
+        "hint": "💡 Maslahat: Shaxmatni odam yolg'iz o'ynamaydi.",
+        "a": ["shaxmat o'ynaydi", "shaxmat", "ukasi bilan shaxmat o'ynaydi"]
     },
     {
         "id": 32,
-        "q": "32. 3, 6, 9, 12, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 3 qo'shilmoqda.",
-        "a": ["15", "15 ta", "o'n besh"]
+        "q": "32. Bir oilada 6 ta qiz bor. Har bir qizning bittadan akasi bor. Oilada nechta farzand bor?",
+        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
+        "hint": "💡 Maslahat: Barcha qizlarning akasi bitta odam bo'lishi mumkin.",
+        "a": ["7 ta", "7", "yetti"]
     },
     {
         "id": 33,
-        "q": "33. 20, 18, 16, 14, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 2 kamaymoqda.",
-        "a": ["12", "12 ta", "o'n ikki"]
+        "q": "33. Sizda 10 ta qo'y bor edi. Barchasidan tashqari 3 tasi qochib ketdi. Nechta qo'y qoldi?",
+        "image": "https://images.unsplash.com/photo-1484557985045-edf25e08da73?w=800",
+        "hint": "💡 Maslahat: 'Barchasidan tashqari 3 tasi' nimani anglatadi?",
+        "a": ["3 ta", "3", "uchta"]
     },
     {
         "id": 34,
-        "q": "34. 50, 45, 40, 35, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 5 kamaymoqda.",
-        "a": ["30", "30 ta", "o'ttiz"]
+        "q": "34. 10 ta baliqdan 2 tasi cho'kib ketdi. Akvariumda nechta baliq qoldi?",
+        "image": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?w=800",
+        "hint": "💡 Maslahat: Baliqlar suvda yashaydi.",
+        "a": ["10 ta", "10", "o'nta"]
     },
     {
         "id": 35,
-        "q": "35. 1, 2, 4, 8, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 2 ga ko'paymoqda.",
-        "a": ["16", "16 ta", "o'n olti"]
+        "q": "35. Bir qo'lingizda 5 ta olma, ikkinchi qo'lingizda 5 ta olma bor. Sizda nima bor?",
+        "image": "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?w=800",
+        "hint": "💡 Maslahat: Savol olmalardan ko'ra boshqa narsani so'rayapti.",
+        "a": ["katta qo'llar", "ikkita qo'l", "qo'llar"]
     },
     {
         "id": 36,
-        "q": "36. 2, 6, 18, 54, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 3 ga ko'paymoqda.",
-        "a": ["162", "162 ta", "bir yuz oltmish ikki"]
+        "q": "36. Qaysi xona eshigi yoki derazasi bo'lmasa ham xona hisoblanadi?",
+        "image": "https://images.unsplash.com/photo-1511497584788-876760111969?w=800",
+        "hint": "💡 Maslahat: Tabiatda ham 'xona'ga o'xshash joy bor.",
+        "a": ["qo'ziqorin", "qo'ziqorin xonasi"]
     },
     {
         "id": 37,
-        "q": "37. 100, 90, 80, 70, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 10 kamaymoqda.",
-        "a": ["60", "60 ta", "oltmish"]
+        "q": "37. Qaysi daraxtning bargi yo'q, lekin u daraxt deb ataladi?",
+        "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+        "hint": "💡 Maslahat: Kitob bilan bog'liq bo'lishi mumkin.",
+        "a": ["nasab daraxti", "genealogik daraxt", "daraxt rasmi"]
     },
     {
         "id": 38,
-        "q": "38. 4, 8, 12, 16, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 4 qo'shilmoqda.",
-        "a": ["20", "20 ta", "yigirma"]
+        "q": "38. Qaysi kalit hech qanday qulfni ochmaydi?",
+        "image": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+        "hint": "💡 Maslahat: U musiqa bilan bog'liq.",
+        "a": ["musiqa kaliti", "skripka kaliti", "sol kaliti"]
     },
     {
         "id": 39,
-        "q": "39. 7, 14, 21, 28, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 7 qo'shilmoqda.",
-        "a": ["35", "35 ta", "o'ttiz besh"]
+        "q": "39. Qaysi stol ustida ovqat yeyib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800",
+        "hint": "💡 Maslahat: Bu stol o'yin bilan bog'liq.",
+        "a": ["kompyuter stoli", "ping pong stoli", "o'yin stoli"]
     },
     {
         "id": 40,
-        "q": "40. 30, 27, 24, 21, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 3 kamaymoqda.",
-        "a": ["18", "18 ta", "o'n sakkiz"]
+        "q": "40. Qaysi ko'z bilan hech narsani ko'rib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?w=800",
+        "hint": "💡 Maslahat: U ignada ham bo'ladi.",
+        "a": ["igna ko'zi", "ignaning ko'zi", "ko'z teshigi"]
     },
     {
         "id": 41,
-        "q": "41. 5, 10, 20, 40, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 2 ga ko'paymoqda.",
-        "a": ["80", "80 ta", "sakson"]
+        "q": "41. Qaysi til bilan gapirib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800",
+        "hint": "💡 Maslahat: Poyabzal bilan bog'liq.",
+        "a": ["poyabzal tili", "etik tili", "poyabzalning tili"]
     },
     {
         "id": 42,
-        "q": "42. 81, 27, 9, 3, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 3 ga bo'linmoqda.",
-        "a": ["1", "1 ta", "bir"]
+        "q": "42. Qaysi quloq eshitmaydi?",
+        "image": "https://images.unsplash.com/photo-1587778082149-bd5b1e4a7a4e?w=800",
+        "hint": "💡 Maslahat: U idishda bo'lishi mumkin.",
+        "a": ["qozon qulog'i", "qozonning qulog'i", "idish qulog'i"]
     },
     {
         "id": 43,
-        "q": "43. 2, 5, 8, 11, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 3 qo'shilmoqda.",
-        "a": ["14", "14 ta", "o'n to'rt"]
+        "q": "43. Qaysi boshda miya bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+        "hint": "💡 Maslahat: Bu bosh kiyim bilan bog'liq.",
+        "a": ["mix boshi", "mixning boshi", "mix"]
     },
     {
         "id": 44,
-        "q": "44. 100, 50, 25, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 2 ga bo'linmoqda.",
-        "a": ["12.5", "12,5"]
+        "q": "44. Bir uyda 4 ta xona bor. Har xonada bittadan chiroq, tashqarida esa 4 ta kalit bor. Qaysi kalit qaysi chiroqqa tegishli ekanini qanday aniqlash mumkin?",
+        "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800",
+        "hint": "💡 Maslahat: Chiroqning issiqligidan ham foydalanish mumkin.",
+        "a": ["birini yoqib kutish", "chiroqni yoqib issiqligini tekshirish", "issiqlik bilan"]
     },
     {
         "id": 45,
-        "q": "45. 1, 4, 7, 10, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 3 qo'shilmoqda.",
-        "a": ["13", "13 ta", "o'n uch"]
+        "q": "45. Uchta lampochka bor. Siz xonaga faqat bir marta kirishingiz mumkin. Tashqaridagi uchta kalitdan qaysi biri qaysi lampochkaniki ekanini qanday topasiz?",
+        "image": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800",
+        "hint": "💡 Maslahat: Bir lampochkani yoqing, keyin o'chiring va issiqligini tekshiring.",
+        "a": ["bittasini yoqib, bittasini yoqib-o'chirib, issiqligini tekshirish", "issiqlik orqali"]
     },
     {
         "id": 46,
-        "q": "46. 2, 4, 8, 16, 32, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har bir son oldingisining 2 baravari.",
-        "a": ["64", "64 ta", "oltmish to'rt"]
+        "q": "46. Sizda 2 ta arqon bor. Har biri aynan 1 soatda yonib tugaydi, ammo notekis yonadi. 45 daqiqani qanday o'lchaysiz?",
+        "image": "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=800",
+        "hint": "💡 Maslahat: Arqonning ikki uchini bir vaqtda yoqishdan foydalaning.",
+        "a": ["birinchi arqonning ikki uchini, ikkinchisining bir uchini yoqish", "ikki uchidan yoqish"]
     },
     {
         "id": 47,
-        "q": "47. 64, 32, 16, 8, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 2 ga bo'ling.",
-        "a": ["4", "4 ta", "to'rt"]
+        "q": "47. Bir odam yomg'irda ko'chada yurdi, lekin oyoqlari ham, kiyimlari ham ho'l bo'lmadi. U qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=800",
+        "hint": "💡 Maslahat: Yomg'ir qayerda yog'ayotganiga qarang.",
+        "a": ["yomg'ir yog'mayotgan joyda", "yomg'ir to'xtagan edi", "yopiq joyda"]
     },
     {
         "id": 48,
-        "q": "48. 9, 18, 27, 36, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 9 qo'shilmoqda.",
-        "a": ["45", "45 ta", "qirq besh"]
+        "q": "48. Bir odam har kuni lift bilan 10-qavatga chiqadi, lekin pastga tushishda faqat 5-qavatgacha lift bilan tushib, qolganini piyoda yuradi. Nega?",
+        "image": "https://images.unsplash.com/photo-1544724569-5f546fd6f2b0?w=800",
+        "hint": "💡 Maslahat: Odamning bo'yi haqida o'ylang.",
+        "a": ["bo'yi kalta", "liftning tugmasiga yetmaydi", "5-qavatdan yuqoridagi tugmaga qo'li yetmaydi"]
     },
     {
         "id": 49,
-        "q": "49. 11, 22, 33, 44, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 11 tadan oshib bormoqda.",
-        "a": ["55", "55 ta", "ellik besh"]
+        "q": "49. Bir odam yakshanba kuni otiga minib yo'lga chiqdi. Uch kun o'tib yakshanba kuni qaytdi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1551884831-bbf3cdc6469e?w=800",
+        "hint": "💡 Maslahat: Otining nomi haqida o'ylang.",
+        "a": ["otining nomi yakshanba", "oti yakshanba"]
     },
     {
         "id": 50,
-        "q": "50. 15, 30, 45, 60, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 15 qo'shilmoqda.",
-        "a": ["75", "75 ta", "yetmish besh"]
+        "q": "50. Bir xona ichida 10 kishi bor. Har biri boshqa odam bilan qo'l berib ko'rishdi. Jami nechta qo'l siqish bo'ladi?",
+        "image": "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800",
+        "hint": "💡 Maslahat: Har bir juftlik faqat bir marta qo'l berishadi.",
+        "a": ["45", "45 ta"]
     },
     {
         "id": 51,
-        "q": "51. 3, 9, 27, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 3 ga ko'paymoqda.",
-        "a": ["81", "81 ta", "sakson bir"]
+        "q": "51. 5 ta odam bir-biri bilan qo'l berishdi. Har bir juftlik bir marta qo'l bergan bo'lsa, jami nechta qo'l siqish bo'ldi?",
+        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
+        "hint": "💡 Maslahat: Juftliklarni sanang.",
+        "a": ["10", "10 ta"]
     },
     {
         "id": 52,
-        "q": "52. 5, 15, 45, ?",
+        "q": "52. Bir sonni 2 ga ko'paytirib, 2 qo'shib, 2 ga bo'lsangiz 6 chiqadi. Bu son nechchi?",
         "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 3 ga ko'paymoqda.",
-        "a": ["135", "135 ta"]
+        "hint": "💡 Maslahat: Amallarni teskari tartibda bajaring.",
+        "a": ["5", "besh"]
     },
     {
         "id": 53,
-        "q": "53. 40, 35, 30, 25, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 5 kamaymoqda.",
-        "a": ["20", "20 ta", "yigirma"]
+        "q": "53. 3 ta mushuk 3 daqiqada 3 ta sichqon tutsa, 100 ta mushuk 100 ta sichqonni necha daqiqada tutadi?",
+        "image": "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=800",
+        "hint": "💡 Maslahat: Har bir mushuk bir xil tezlikda ishlayapti.",
+        "a": ["3 daqiqa", "3", "uch daqiqa"]
     },
     {
         "id": 54,
-        "q": "54. 6, 12, 24, 48, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 2 baravar bo'lmoqda.",
-        "a": ["96", "96 ta", "to'qson olti"]
+        "q": "54. 1 ta g'isht 1 kilogramm va yarim g'isht og'irligiga teng. To'liq g'isht necha kilogramm?",
+        "image": "https://images.unsplash.com/photo-1590077213355-cf9f2e5e5d72?w=800",
+        "hint": "💡 Maslahat: Tenglamani tuzing.",
+        "a": ["2 kg", "2 kilogramm"]
     },
     {
         "id": 55,
-        "q": "55. 72, 60, 48, 36, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 12 kamaymoqda.",
-        "a": ["24", "24 ta", "yigirma to'rt"]
+        "q": "55. Daraxtda 20 ta olma bor edi. 5 tasi tushib ketdi. Daraxtda nechta olma qoldi?",
+        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+        "hint": "💡 Maslahat: Oddiy hisob.",
+        "a": ["15", "15 ta", "15 dona"]
     },
     {
         "id": 56,
-        "q": "56. 8, 16, 24, 32, ?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Har safar 8 qo'shilmoqda.",
-        "a": ["40", "40 ta", "qirq"]
+        "q": "56. 10 dan 1 ni necha marta ayirish mumkin?",
+        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+        "hint": "💡 Maslahat: Birinchi marta ayirgandan keyin son o'zgaradi.",
+        "a": ["1 marta", "bir marta"]
     },
     {
         "id": 57,
-        "q": "57. 1, 5, 9, 13, ?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Har safar 4 qo'shilmoqda.",
-        "a": ["17", "17 ta", "o'n yetti"]
+        "q": "57. 30 ni uchdan biriga bo'lib, 10 qo'shsangiz nechchi chiqadi?",
+        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
+        "hint": "💡 Maslahat: 30 ning uchdan biri 10.",
+        "a": ["100", "100 ta"]
     },
-
-    # =========================
-    # 58-87 | HISOB-KITOB
-    # =========================
-
     {
         "id": 58,
-        "q": "58. 12 + 18 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Sonlarni qo'shing.",
-        "a": ["30", "30 ta", "o'ttiz"]
+        "q": "58. Bir oyda 28 kun bor. Nechta oyda 28 kun bor?",
+        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+        "hint": "💡 Maslahat: Faqat fevral haqida o'ylamang.",
+        "a": ["12 ta", "12", "barcha oyda", "12 oyda"]
     },
     {
         "id": 59,
-        "q": "59. 45 - 17 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 45 dan 17 ni ayiring.",
-        "a": ["28", "28 ta", "yigirma sakkiz"]
+        "q": "59. Bir yilda nechta oy 30 kundan iborat?",
+        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+        "hint": "💡 Maslahat: Aynan 30 kunlik oylarni sanang.",
+        "a": ["4 ta", "4", "to'rtta"]
     },
     {
         "id": 60,
-        "q": "60. 7 × 8 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 7 ni 8 marta qo'shing.",
-        "a": ["56", "56 ta", "ellik olti"]
+        "q": "60. Qaysi oyda 28 kun bo'lishi aniq?",
+        "image": "https://images.unsplash.com/photo-1455849318743-b2233052fcff?w=800",
+        "hint": "💡 Maslahat: Barcha oylarni o'ylab ko'ring.",
+        "a": ["har oyda", "barcha oyda", "12 oyda"]
     },
     {
         "id": 61,
-        "q": "61. 81 ÷ 9 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 81 ni 9 ga bo'ling.",
-        "a": ["9", "9 ta", "to'qqiz"]
-    },
-    {
-        "id": 62,
-        "q": "62. 25 + 35 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Ikkala sonni qo'shing.",
-        "a": ["60", "60 ta", "oltmish"]
-    },
-    {
-        "id": 63,
-        "q": "63. 90 - 45 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 90 ning yarmiga teng.",
-        "a": ["45", "45 ta", "qirq besh"]
-    },
-    {
-        "id": 64,
-        "q": "64. 9 × 6 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 9 ni 6 marta qo'shing.",
-        "a": ["54", "54 ta", "ellik to'rt"]
-    },
-    {
-        "id": 65,
-        "q": "65. 72 ÷ 8 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 72 ni 8 ga bo'ling.",
-        "a": ["9", "9 ta", "to'qqiz"]
-    },
-    {
-        "id": 66,
-        "q": "66. 15 + 25 + 10 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Uchta sonni qo'shing.",
-        "a": ["50", "50 ta", "ellik"]
-    },
-    {
-        "id": 67,
-        "q": "67. 100 - 25 - 25 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Ikki marta 25 ayiring.",
-        "a": ["50", "50 ta", "ellik"]
-    },
-    {
-        "id": 68,
-        "q": "68. 5 × 7 + 5 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval ko'paytirishni bajaring.",
-        "a": ["40", "40 ta", "qirq"]
-    },
-    {
-        "id": 69,
-        "q": "69. 30 ÷ 5 + 4 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Avval bo'lishni bajaring.",
-        "a": ["10", "10 ta", "o'n"]
-    },
-    {
-        "id": 70,
-        "q": "70. 8 × 4 - 6 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval ko'paytiring.",
-        "a": ["26", "26 ta", "yigirma olti"]
-    },
-    {
-        "id": 71,
-        "q": "71. 50 + 20 - 15 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Amallarni chapdan o'ngga bajaring.",
-        "a": ["55", "55 ta", "ellik besh"]
-    },
-    {
-        "id": 72,
-        "q": "72. 6 × 6 - 10 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval 6 × 6 ni hisoblang.",
-        "a": ["26", "26 ta", "yigirma olti"]
-    },
-    {
-        "id": 73,
-        "q": "73. 100 ÷ 10 × 2 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Bo'lish va ko'paytirishni chapdan o'ngga bajaring.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 74,
-        "q": "74. 7 + 7 × 2 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval ko'paytirish.",
-        "a": ["21", "21 ta", "yigirma bir"]
-    },
-    {
-        "id": 75,
-        "q": "75. 20 - 4 × 3 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Avval ko'paytirishni bajaring.",
-        "a": ["8", "8 ta", "sakkiz"]
-    },
-    {
-        "id": 76,
-        "q": "76. 36 ÷ 6 + 8 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval bo'lish.",
-        "a": ["14", "14 ta", "o'n to'rt"]
-    },
-    {
-        "id": 77,
-        "q": "77. 9 × 5 - 20 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Avval ko'paytirish.",
-        "a": ["25", "25 ta", "yigirma besh"]
-    },
-    {
-        "id": 78,
-        "q": "78. 48 ÷ 6 × 3 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Chapdan o'ngga hisoblang.",
-        "a": ["24", "24 ta", "yigirma to'rt"]
-    },
-    {
-        "id": 79,
-        "q": "79. 11 × 3 + 7 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Avval ko'paytirish.",
-        "a": ["40", "40 ta", "qirq"]
-    },
-    {
-        "id": 80,
-        "q": "80. 60 ÷ 5 + 8 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval bo'lish.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 81,
-        "q": "81. 14 + 6 × 3 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Ko'paytirish birinchi.",
-        "a": ["32", "32 ta", "o'ttiz ikki"]
-    },
-    {
-        "id": 82,
-        "q": "82. 50 - 8 × 4 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval ko'paytirish.",
-        "a": ["18", "18 ta", "o'n sakkiz"]
-    },
-    {
-        "id": 83,
-        "q": "83. 9 × 9 + 1 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 9 × 9 ni hisoblang.",
-        "a": ["82", "82 ta", "sakson ikki"]
-    },
-    {
-        "id": 84,
-        "q": "84. 100 ÷ 4 + 25 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 100 ning choragini toping.",
-        "a": ["50", "50 ta", "ellik"]
-    },
-    {
-        "id": 85,
-        "q": "85. 15 × 2 - 10 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Avval ko'paytiring.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 86,
-        "q": "86. 80 - 20 ÷ 4 nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Avval bo'lishni bajaring.",
-        "a": ["75", "75 ta", "yetmish besh"]
-    },
-    {
-        "id": 87,
-        "q": "87. 7 × 7 - 9 nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 49 dan 9 ni ayiring.",
-        "a": ["40", "40 ta", "qirq"]
-    },
-
-    # =========================
-    # 88-117 | VAQT VA SOAT
-    # =========================
-
-    {
-        "id": 88,
-        "q": "88. Bir soatda nechta daqiqa bor?",
+        "q": "61. Soat 3:00 bo'lsa, soat strelkasi va minut strelkasi orasidagi burchak nechchi daraja?",
         "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Soat va daqiqa munosabatini eslang.",
-        "a": ["60", "60 ta", "oltmish"]
-    },
-    {
-        "id": 89,
-        "q": "89. Yarim soat necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 ning yarmini toping.",
-        "a": ["30", "30 daqiqa", "o'ttiz"]
-    },
-    {
-        "id": 90,
-        "q": "90. Chorak soat necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 ni 4 ga bo'ling.",
-        "a": ["15", "15 daqiqa", "o'n besh"]
-    },
-    {
-        "id": 91,
-        "q": "91. Soat 3:00 da strelkalar orasidagi burchak nechchi daraja?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Bu to'g'ri burchak.",
+        "hint": "💡 Maslahat: Strelkalar to'g'ri burchak hosil qiladi.",
         "a": ["90", "90 daraja"]
     },
     {
-        "id": 92,
-        "q": "92. Soat 6:00 da strelkalar orasidagi burchak nechchi daraja?",
+        "id": 62,
+        "q": "62. Soat 6:00 bo'lsa, ikki strelka orasidagi burchak nechchi daraja?",
         "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Strelkalar qarama-qarshi turadi.",
+        "hint": "💡 Maslahat: Strelkalar qarama-qarshi turadi.",
         "a": ["180", "180 daraja"]
     },
     {
-        "id": 93,
-        "q": "93. 2 soat necha daqiqa?",
+        "id": 63,
+        "q": "63. Bir odamning 4 ta qizi bor. Har bir qizning bittadan ukasi bor. Jami nechta farzand?",
+        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
+        "hint": "💡 Maslahat: Uka hamma qizlar uchun bitta bo'lishi mumkin.",
+        "a": ["5 ta", "5", "beshta"]
+    },
+    {
+        "id": 64,
+        "q": "64. Bir xonada 7 ta sham bor. 3 tasi o'chib qoldi. Nechta sham bor?",
+        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
+        "hint": "💡 Maslahat: Savol yonib turgan shamlar haqida emas.",
+        "a": ["7 ta", "7", "yettita"]
+    },
+    {
+        "id": 65,
+        "q": "65. Sizda gugurt bor. Qorong'i xonada sham, kerosin chiroq va pechka turibdi. Avval nimani yoqasiz?",
+        "image": "https://images.unsplash.com/photo-1509565840034-3c2f1f4f5f75?w=800",
+        "hint": "💡 Maslahat: Olov kerak bo'ladi.",
+        "a": ["gugurtni", "gugurt", "avval gugurtni"]
+    },
+    {
+        "id": 66,
+        "q": "66. Qaysi narsa sindirilsa, undan keyin ishlatiladi?",
+        "image": "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=800",
+        "hint": "💡 Maslahat: Nonushtada ko'p uchraydi.",
+        "a": ["tuxum", "tuxumni"]
+    },
+    {
+        "id": 67,
+        "q": "67. Qaysi narsa ochilmasdan turib ichiladi?",
+        "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800",
+        "hint": "💡 Maslahat: Ustiga qopqoq qo'yilgan idishni o'ylang.",
+        "a": ["somoncha bilan ichimlik", "trubka orqali ichimlik", "naycha orqali"]
+    },
+    {
+        "id": 68,
+        "q": "68. Qaysi narsa yuradi, lekin oyog'i yo'q?",
+        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
+        "hint": "💡 Maslahat: Vaqt ham 'yuradi'.",
+        "a": ["soat", "vaqt", "soat yuradi"]
+    },
+    {
+        "id": 69,
+        "q": "69. Qaysi narsa gapiradi, lekin og'zi yo'q?",
+        "image": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800",
+        "hint": "💡 Maslahat: U tovushni qaytarishi mumkin.",
+        "a": ["aks-sado", "echo", "sado"]
+    },
+    {
+        "id": 70,
+        "q": "70. Qaysi narsa sizga javob beradi, lekin o'zi savol bermaydi?",
+        "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "hint": "💡 Maslahat: Ovoz bilan bog'liq.",
+        "a": ["aks-sado", "echo", "sado"]
+    },
+    {
+        "id": 71,
+        "q": "71. Qaysi narsa bir joyda turib butun dunyoni aylanib chiqadi?",
+        "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+        "hint": "💡 Maslahat: U xat yoki posilkada bo'lishi mumkin.",
+        "a": ["marka", "pochta markasi", "pochta"]
+    },
+    {
+        "id": 72,
+        "q": "72. Qaysi narsa devordan o'ta oladi, lekin devorni buzmaydi?",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        "hint": "💡 Maslahat: Yorug'lik haqida o'ylang.",
+        "a": ["nur", "yorug'lik", "soya"]
+    },
+    {
+        "id": 73,
+        "q": "73. Qaysi narsa derazadan kiradi, lekin eshikdan kirmaydi?",
+        "image": "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?w=800",
+        "hint": "💡 Maslahat: Uni ko'ra olasiz, lekin ushlay olmaysiz.",
+        "a": ["quyosh nuri", "nur", "yorug'lik"]
+    },
+    {
+        "id": 74,
+        "q": "74. Qaysi narsa qancha ko'p olinsa, shuncha ko'p ortida qoladi?",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        "hint": "💡 Maslahat: Yurish bilan bog'liq.",
+        "a": ["qadam", "qadamlar", "iz"]
+    },
+    {
+        "id": 75,
+        "q": "75. Qaysi narsa yuradi-yuradi, lekin joyidan qimirlamaydi?",
         "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 ni 2 ga ko'paytiring.",
-        "a": ["120", "120 daqiqa", "bir yuz yigirma"]
+        "hint": "💡 Maslahat: Vaqtni ko'rsatadigan narsani o'ylang.",
+        "a": ["soat", "soat strelkasi"]
+    },
+    {
+        "id": 76,
+        "q": "76. Qaysi narsa boshiga tegsa ham og'riq sezmaydi?",
+        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
+        "hint": "💡 Maslahat: Mixning boshi bor.",
+        "a": ["mix", "mixning boshi"]
+    },
+    {
+        "id": 77,
+        "q": "77. Qaysi narsa ko'tarilgan sari pastga tushadi?",
+        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
+        "hint": "💡 Maslahat: Harorat bilan bog'liq.",
+        "a": ["termometr", "termometrdagi simob"]
+    },
+    {
+        "id": 78,
+        "q": "78. Qaysi narsa yozda ham, qishda ham bir xil rangda qoladi?",
+        "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+        "hint": "💡 Maslahat: Doim yashil daraxtni o'ylang.",
+        "a": ["archa", "doim yashil daraxt", "qarag'ay"]
+    },
+    {
+        "id": 79,
+        "q": "79. Bir odamning oldida ikki kishi, orqasida ikki kishi va o'rtasida bir kishi turibdi. Jami nechta odam bor?",
+        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
+        "hint": "💡 Maslahat: Odamlar bir qatorda turishi mumkin.",
+        "a": ["5 ta", "5", "beshta"]
+    },
+    {
+        "id": 80,
+        "q": "80. Uchta odam bir soyabon ostida turibdi, lekin hech biri ho'l bo'lmadi. Nega?",
+        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
+        "hint": "💡 Maslahat: Yomg'ir yog'ayotgan bo'lishi shart emas.",
+        "a": ["yomg'ir yog'mayotgan edi", "yomg'ir yo'q edi"]
+    },
+    {
+        "id": 81,
+        "q": "81. Bir odamning 10 ta barmog'i bor. 10 odamning nechta barmog'i bor?",
+        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
+        "hint": "💡 Maslahat: Har bir odamda 10 ta barmoq bor deb hisoblang.",
+        "a": ["100 ta", "100", "yuzta"]
+    },
+    {
+        "id": 82,
+        "q": "82. Bir kishi 20 yoshda, ammo tug'ilgan kunini atigi 5 marta nishonlagan. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?w=800",
+        "hint": "💡 Maslahat: Tug'ilgan sanasi oddiy sana emas.",
+        "a": ["29 fevralda tug'ilgan", "29-fevral", "kabisa kuni"]
+    },
+    {
+        "id": 83,
+        "q": "83. Bir odam 2020-yilda 20 yoshda edi, 2025-yilda esa 15 yoshda bo'ldi. Bu qanday mumkin?",
+        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+        "hint": "💡 Maslahat: Yillar oddiy tartibda o'tmayapti.",
+        "a": ["miloddan avval", "miloddan avvalgi", "bc"]
+    },
+    {
+        "id": 84,
+        "q": "84. Qaysi raqamni teskari aylantirsangiz ham o'sha raqam bo'lib qoladi?",
+        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "hint": "💡 Maslahat: Raqamning shakliga qarang.",
+        "a": ["0", "8"]
+    },
+    {
+        "id": 85,
+        "q": "85. 2 + 2 × 2 nechchi bo'ladi?",
+        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+        "hint": "💡 Maslahat: Amal bajarish tartibiga rioya qiling.",
+        "a": ["6", "olti"]
+    },
+    {
+        "id": 86,
+        "q": "86. 100 dan 10 ni necha marta ayirsangiz 50 qoladi?",
+        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
+        "hint": "💡 Maslahat: Oddiy hisob emas, savolning qanday berilganiga e'tibor bering.",
+        "a": ["1 marta", "bir marta"]
+    },
+    {
+        "id": 87,
+        "q": "87. Bir daraxtda 6 ta qush bor. Siz 2 tasini qo'rqitdingiz. Nechta qush daraxtda qoladi?",
+        "image": "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=800",
+        "hint": "💡 Maslahat: Qo'rqqan qushlar uchib ketishi mumkin.",
+        "a": ["4 ta", "4", "to'rtta"]
+    },
+    {
+        "id": 88,
+        "q": "88. 4 ta tuxumning har birini 5 daqiqadan qaynatish kerak. Barchasini bir vaqtda qaynatsangiz qancha vaqt ketadi?",
+        "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+        "hint": "💡 Maslahat: Tuxumlarni bir vaqtda qozonga solish mumkin.",
+        "a": ["5 daqiqa", "5", "besh daqiqa"]
+    },
+    {
+        "id": 89,
+        "q": "89. 3 ta tuxum 3 daqiqada pishadi. 9 ta tuxum bir qozonda necha daqiqada pishadi?",
+        "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+        "hint": "💡 Maslahat: Ular bir vaqtda pishishi mumkin.",
+        "a": ["3 daqiqa", "3", "uch daqiqa"]
+    },
+    {
+        "id": 90,
+        "q": "90. Bir xonada 4 ta burchak bor. Har burchakda bittadan sham turibdi. Har shamning yonida 2 ta sham bor. Jami nechta sham bor?",
+        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
+        "hint": "💡 Maslahat: Shamlar bir-birining yonida bo'lishi mumkin.",
+        "a": ["4 ta", "4", "to'rtta"]
+    },
+    {
+        "id": 91,
+        "q": "91. Bir savatda 5 ta olma bor. 5 bola bittadan olma oldi, lekin savatda bitta olma qoldi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+        "hint": "💡 Maslahat: Oxirgi bola olmani savati bilan olishi mumkin.",
+        "a": ["oxirgi bola savatdagi olmani oldi", "savat bilan oldi", "olmani savati bilan oldi"]
+    },
+    {
+        "id": 92,
+        "q": "92. Bir odam do'konga kirib 10 000 so'mlik mahsulot oldi va 20 000 so'm berdi. Sotuvchi 10 000 qaytim berdi. Keyin u mahsulotni qaytarib berdi. Sotuvchi qancha pulni qaytarishi kerak?",
+        "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
+        "hint": "💡 Maslahat: Xaridor avval mahsulot uchun qancha to'lagan?",
+        "a": ["10000", "10 000", "10000 so'm", "10 ming"]
+    },
+    {
+        "id": 93,
+        "q": "93. Bir xonada 3 ta it bor. Har bir itning qarshisida 2 ta it bor. Jami nechta it bor?",
+        "image": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800",
+        "hint": "💡 Maslahat: Itlar bir-biriga qarab turishi mumkin.",
+        "a": ["3 ta", "3", "uchta"]
     },
     {
         "id": 94,
-        "q": "94. 3 soat 30 daqiqa jami necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 3 soatni daqiqaga aylantiring.",
-        "a": ["210", "210 daqiqa", "ikki yuz o'n"]
+        "q": "94. Qaysi narsa suvga tushsa ham ho'l bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+        "hint": "💡 Maslahat: U yorug'lik bilan bog'liq.",
+        "a": ["soya", "aks", "soyasi"]
     },
     {
         "id": 95,
-        "q": "95. 90 daqiqa necha soat-u necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 daqiqani bir soat deb oling.",
-        "a": ["1 soat 30 daqiqa", "1 soat 30 minut", "bir soat o'ttiz daqiqa"]
+        "q": "95. Qaysi narsa sizdan oldin keladi, lekin uni ko'ra olmaysiz?",
+        "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800",
+        "hint": "💡 Maslahat: Kelajak haqida o'ylang.",
+        "a": ["kelajak", "ertangi kun", "kelajakdagi vaqt"]
     },
     {
         "id": 96,
-        "q": "96. 120 daqiqa necha soat?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Har bir soat 60 daqiqa.",
-        "a": ["2 soat", "2", "ikki soat"]
+        "q": "96. Qaysi narsa doim oldinda bo'ladi, lekin unga hech qachon yetib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800",
+        "hint": "💡 Maslahat: Vaqt bilan bog'liq.",
+        "a": ["kelajak", "ertangi kun"]
     },
     {
         "id": 97,
-        "q": "97. Dars 9:00 da boshlandi va 45 daqiqa davom etdi. Qachon tugadi?",
-        "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-        "hint": "💡 9:00 ga 45 daqiqa qo'shing.",
-        "a": ["9:45", "09:45", "9 45"]
+        "q": "97. Qaysi narsa bir marta aytilsa, uni qaytarib bo'lmaydi?",
+        "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800",
+        "hint": "💡 Maslahat: So'z bilan bog'liq.",
+        "a": ["so'z", "aytilgan so'z", "gap"]
     },
     {
         "id": 98,
-        "q": "98. Soat 14:00 dan 2 soat keyin soat nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 14 ga 2 qo'shing.",
-        "a": ["16:00", "16", "16 00"]
+        "q": "98. Qaysi narsa qancha ko'p bo'lsa, shuncha kam og'irlik qiladi?",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        "hint": "💡 Maslahat: Juda yengil narsalarni o'ylang.",
+        "a": ["havo", "havo pufakchalari", "sharlar"]
     },
     {
         "id": 99,
-        "q": "99. Soat 18:00 dan 3 soat oldin soat nechchi edi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 18 dan 3 ni ayiring.",
-        "a": ["15:00", "15", "15 00"]
+        "q": "99. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
+        "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800",
+        "hint": "💡 Maslahat: Tarozi bilan bog'liq.",
+        "a": ["tarozi", "tarozi pallasi"]
     },
     {
         "id": 100,
-        "q": "100. Bir kun necha soat?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Bir sutkadagi soatlarni eslang.",
-        "a": ["24", "24 soat", "yigirma to'rt"]
+        "q": "100. Qaysi narsa har doim siz bilan, ammo siz uni ko'ra olmaysiz?",
+        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+        "hint": "💡 Maslahat: U tanangizga tegishli emas.",
+        "a": ["soya", "nafas", "havo"]
     },
     {
         "id": 101,
-        "q": "101. Bir sutka necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 24 × 60.",
-        "a": ["1440", "1440 daqiqa"]
+        "q": "101. Bir odam oynaga qaradi va o'zini ko'rmadi. Nega?",
+        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800",
+        "hint": "💡 Maslahat: Oyna haqida emas, atrofdagi sharoit haqida o'ylang.",
+        "a": ["qorong'i edi", "xona qorong'i edi", "yorug'lik yo'q edi"]
     },
     {
         "id": 102,
-        "q": "102. Bir hafta necha soat?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 7 kunni 24 soatga ko'paytiring.",
-        "a": ["168", "168 soat"]
+        "q": "102. Bir uyda barcha derazalar janubga qaragan. Uy yonidan ayiq o'tdi. Ayiq qanday rangda?",
+        "image": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=800",
+        "hint": "💡 Maslahat: Barcha derazalar janubga qarashi mumkin bo'lgan joyni o'ylang.",
+        "a": ["oq", "oq rangda", "oq ayiq"]
     },
     {
         "id": 103,
-        "q": "103. 5 daqiqada necha soniya bor?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 1 daqiqada 60 soniya.",
-        "a": ["300", "300 soniya", "uch yuz"]
+        "q": "103. Bir odam 5 kun uxlamasdan yashadi, lekin sog'-salomat qoldi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+        "hint": "💡 Maslahat: U faqat kechasi uxlamagan bo'lishi shart emas.",
+        "a": ["kechasi uxlagan", "kunduzi uxlagan", "u kechasi uxlagan"]
     },
     {
         "id": 104,
-        "q": "104. 2 daqiqada necha soniya bor?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 × 2.",
-        "a": ["120", "120 soniya"]
+        "q": "104. Bir odam yomg'irda boshiga hech narsa kiymadi, lekin sochlari ho'l bo'lmadi. Nega?",
+        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
+        "hint": "💡 Maslahat: Uning sochiga e'tibor bering.",
+        "a": ["u kal edi", "sochi yo'q edi", "kal"]
     },
     {
         "id": 105,
-        "q": "105. Soat 7:30 dan 30 daqiqa keyin soat nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Yarim soat qo'shing.",
-        "a": ["8:00", "08:00", "8 00"]
+        "q": "105. Bir odamning qo'lida 5 ta barmog'i bor, lekin ularning hech biri uning qo'li emas. Bu qanday mumkin?",
+        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
+        "hint": "💡 Maslahat: 'Qo'lida' so'zining boshqa ma'nosini o'ylang.",
+        "a": ["qo'lqopda", "qo'lqop", "qo'lqopning barmoqlari"]
     },
     {
         "id": 106,
-        "q": "106. Soat 10:15 dan 45 daqiqa keyin soat nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 15 + 45 = 60 daqiqa.",
-        "a": ["11:00", "11:00 da", "11"]
+        "q": "106. Bir kishi xonaga kirib, chiroqni yoqdi. Chiroq yoqilgach xona kichrayib qoldi. Qanday qilib?",
+        "image": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800",
+        "hint": "💡 Maslahat: Xonaning o'zi emas, ko'rinishi o'zgargan.",
+        "a": ["soya yo'qoldi", "yorug'lik sababli ko'rinishi o'zgardi"]
     },
     {
         "id": 107,
-        "q": "107. Soat 12:20 dan 40 daqiqa keyin soat nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 20 + 40 = 60.",
-        "a": ["13:00", "13:00 da", "13"]
-    },
-    {
-        "id": 108,
-        "q": "108. Soat 16:30 dan 1 soat 30 daqiqa keyin soat nechchi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Avval 1 soat, keyin 30 daqiqa qo'shing.",
-        "a": ["18:00", "18:00 da", "18"]
-    },
-    {
-        "id": 109,
-        "q": "109. Soat 9:00 dan 2 soat 30 daqiqa keyin soat nechchi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 2 soat 30 daqiqa qo'shing.",
-        "a": ["11:30", "11:30 da"]
-    },
-    {
-        "id": 110,
-        "q": "110. Soat 20:00 dan 2 soat oldin soat nechchi edi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 20 dan 2 ni ayiring.",
-        "a": ["18:00", "18:00 da", "18"]
-    },
-    {
-        "id": 111,
-        "q": "111. 1 yarim soat necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 1 soat + yarim soat.",
-        "a": ["90", "90 daqiqa"]
-    },
-    {
-        "id": 112,
-        "q": "112. 2 yarim soat necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 2 soat va 30 daqiqani qo'shing.",
-        "a": ["150", "150 daqiqa"]
-    },
-    {
-        "id": 113,
-        "q": "113. 3 chorak soat necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Bir chorak 15 daqiqa.",
-        "a": ["45", "45 daqiqa"]
-    },
-    {
-        "id": 114,
-        "q": "114. 2 soat 15 daqiqa jami necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 2 soat = 120 daqiqa.",
-        "a": ["135", "135 daqiqa"]
-    },
-    {
-        "id": 115,
-        "q": "115. 4 soat 20 daqiqa jami necha daqiqa?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 4 × 60 + 20.",
-        "a": ["260", "260 daqiqa"]
-    },
-    {
-        "id": 116,
-        "q": "116. 180 daqiqa necha soat?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 60 ga bo'ling.",
-        "a": ["3 soat", "3", "uch soat"]
-    },
-    {
-        "id": 117,
-        "q": "117. Soat 23:00 dan 2 soat keyin yangi kunning soati nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Yarim tundan o'tib ketadi.",
-        "a": ["1:00", "01:00", "1"]
-    },
-
-    # =========================
-    # 118-147 | TAQQOSLASH
-    # =========================
-
-    {
-        "id": 118,
-        "q": "118. Qaysi son katta: 45 yoki 54?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 O'nliklar raqamiga qarang.",
-        "a": ["54", "54 katta"]
-    },
-    {
-        "id": 119,
-        "q": "119. Qaysi son kichik: 27 yoki 72?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 O'nliklar raqamiga qarang.",
-        "a": ["27", "27 kichik"]
-    },
-    {
-        "id": 120,
-        "q": "120. 100 va 99 dan qaysi biri katta?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Sonlarni solishtiring.",
-        "a": ["100", "100 katta"]
-    },
-    {
-        "id": 121,
-        "q": "121. 0 dan katta eng kichik natural son qaysi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Natural sonlarning boshidan boshlang.",
-        "a": ["1", "bir"]
-    },
-    {
-        "id": 122,
-        "q": "122. 10 dan katta, 12 dan kichik butun son qaysi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 10 va 12 orasidagi sonni toping.",
-        "a": ["11", "11 ta", "o'n bir"]
-    },
-    {
-        "id": 123,
-        "q": "123. 20 dan 5 ga katta son qaysi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 20 ga 5 qo'shing.",
-        "a": ["25", "25 ta", "yigirma besh"]
-    },
-    {
-        "id": 124,
-        "q": "124. 50 dan 8 ga kichik son qaysi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 50 dan 8 ni ayiring.",
-        "a": ["42", "42 ta", "qirq ikki"]
-    },
-    {
-        "id": 125,
-        "q": "125. 3 ta son ichida eng kattasi qaysi: 12, 21, 19?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Sonlarni solishtiring.",
-        "a": ["21"]
-    },
-    {
-        "id": 126,
-        "q": "126. 15, 51, 25 sonlari ichida eng kichigi qaysi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Eng kichik sonni toping.",
-        "a": ["15"]
-    },
-    {
-        "id": 127,
-        "q": "127. 7 ta olma va 9 ta nok bor. Qaysi biri ko'p?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 7 va 9 ni solishtiring.",
-        "a": ["nok", "noklar", "9 ta nok"]
-    },
-    {
-        "id": 128,
-        "q": "128. 5 kg shakar va 3 kg unning qaysi biri og'ir?",
-        "image": "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=800",
-        "hint": "💡 Kilogrammlarni solishtiring.",
-        "a": ["shakar", "5 kg shakar"]
-    },
-    {
-        "id": 129,
-        "q": "129. 2 metr va 150 santimetrdan qaysi biri uzun?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 2 metr = 200 santimetr.",
-        "a": ["2 metr", "200 sm", "2 m"]
-    },
-    {
-        "id": 130,
-        "q": "130. 1 soat va 50 daqiqadan qaysi biri uzoqroq?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 1 soat 60 daqiqa.",
-        "a": ["1 soat", "bir soat"]
-    },
-    {
-        "id": 131,
-        "q": "131. 500 gramm va 1 kilogrammdan qaysi biri og'ir?",
-        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
-        "hint": "💡 1 kg = 1000 gramm.",
-        "a": ["1 kilogramm", "1 kg", "kilogramm"]
-    },
-    {
-        "id": 132,
-        "q": "132. 3 litr va 2500 millilitrdan qaysi biri ko'p?",
-        "image": "https://images.unsplash.com/photo-1559839914-17aae19cec71?w=800",
-        "hint": "💡 3 litr = 3000 ml.",
-        "a": ["3 litr", "3 l", "3000 ml"]
-    },
-    {
-        "id": 133,
-        "q": "133. 10 ning kvadrati katta yoki 90 mi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 10 × 10 ni hisoblang.",
-        "a": ["100", "10 ning kvadrati", "100 katta"]
-    },
-    {
-        "id": 134,
-        "q": "134. 6 × 6 katta yoki 30 mi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 6 × 6 = ?",
-        "a": ["36", "36 katta"]
-    },
-    {
-        "id": 135,
-        "q": "135. 40 ning yarmi katta yoki 25 mi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 40 ning yarmini toping.",
-        "a": ["25", "25 katta"]
-    },
-    {
-        "id": 136,
-        "q": "136. 3 × 10 va 25 dan qaysi biri katta?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 3 × 10 = 30.",
-        "a": ["30", "30 katta"]
-    },
-    {
-        "id": 137,
-        "q": "137. 100 ning 10 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 100 ni 10 ga bo'ling.",
-        "a": ["10", "10 ta", "o'n"]
-    },
-    {
-        "id": 138,
-        "q": "138. 200 ning 10 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 200 ning o'ndan birini toping.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 139,
-        "q": "139. 50 ning 20 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 10 foiz 5 bo'lsa, 20 foiz qancha?",
-        "a": ["10", "10 ta", "o'n"]
-    },
-    {
-        "id": 140,
-        "q": "140. 80 ning 25 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 25 foiz = chorak.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 141,
-        "q": "141. 60 ning 50 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 50 foiz = yarmi.",
-        "a": ["30", "30 ta", "o'ttiz"]
-    },
-    {
-        "id": 142,
-        "q": "142. 200 ning 25 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 200 ning choragini toping.",
-        "a": ["50", "50 ta", "ellik"]
-    },
-    {
-        "id": 143,
-        "q": "143. 400 ning 10 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 400 ni 10 ga bo'ling.",
-        "a": ["40", "40 ta", "qirq"]
-    },
-    {
-        "id": 144,
-        "q": "144. 1000 ning 1 foizi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 1 foiz = yuzdan bir.",
-        "a": ["10", "10 ta", "o'n"]
-    },
-    {
-        "id": 145,
-        "q": "145. 300 ning uchdan biri nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 300 ni 3 ga bo'ling.",
-        "a": ["100", "100 ta", "yuz"]
-    },
-    {
-        "id": 146,
-        "q": "146. 120 ning choragi nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 120 ni 4 ga bo'ling.",
-        "a": ["30", "30 ta", "o'ttiz"]
-    },
-    {
-        "id": 147,
-        "q": "147. 90 ning uchdan biri nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 90 ni 3 ga bo'ling.",
-        "a": ["30", "30 ta", "o'ttiz"]
-    },
-
-    # =========================
-    # 148-177 | DIQQAT VA MANTIQ
-    # =========================
-
-    {
-        "id": 148,
-        "q": "148. 5 ta shamning 2 tasi o'chdi. Yonib turgan nechta sham bor?",
-        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
-        "hint": "💡 5 dan 2 ni ayiring.",
-        "a": ["3", "3 ta", "uchta"]
-    },
-    {
-        "id": 149,
-        "q": "149. 10 ta qushdan 4 tasi uchib ketdi. Daraxtda nechta qush qoldi?",
-        "image": "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=800",
-        "hint": "💡 Uchib ketganlarni ayiring.",
-        "a": ["6", "6 ta", "oltita"]
-    },
-    {
-        "id": 150,
-        "q": "150. 8 ta bola bor. Har biriga 2 tadan qalam berildi. Jami nechta qalam kerak?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 8 × 2.",
-        "a": ["16", "16 ta", "o'n olti"]
-    },
-    {
-        "id": 151,
-        "q": "151. 20 ta konfet 4 bolaga teng bo'lindi. Har bir bola nechta oldi?",
-        "image": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?w=800",
-        "hint": "💡 20 ni 4 ga bo'ling.",
-        "a": ["5", "5 ta", "beshta"]
-    },
-    {
-        "id": 152,
-        "q": "152. 12 ta qalamdan 4 tasi qizil, qolganlari ko'k. Ko'k qalam nechta?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 12 dan 4 ni ayiring.",
-        "a": ["8", "8 ta", "sakkiz"]
-    },
-    {
-        "id": 153,
-        "q": "153. 3 ta qutining har birida 5 tadan shar bor. Jami nechta shar?",
-        "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
-        "hint": "💡 3 × 5.",
-        "a": ["15", "15 ta", "o'n besh"]
-    },
-    {
-        "id": 154,
-        "q": "154. Bir savatda 10 ta olma bor. 3 ta olma olindi. Keyin 5 ta olma qo'shildi. Endi nechta?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Avval ayiring, keyin qo'shing.",
-        "a": ["12", "12 ta", "o'n ikki"]
-    },
-    {
-        "id": 155,
-        "q": "155. 20 ta kitob bor edi. 7 tasi berildi, 3 tasi qaytarildi. Nechta bo'ldi?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 20 - 7 + 3.",
-        "a": ["16", "16 ta", "o'n olti"]
-    },
-    {
-        "id": 156,
-        "q": "156. 5 ta qutining har birida 4 tadan shar bor. 3 ta shar yo'qoldi. Nechta qoldi?",
-        "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
-        "hint": "💡 Avval jami sharni toping.",
-        "a": ["17", "17 ta", "o'n yetti"]
-    },
-    {
-        "id": 157,
-        "q": "157. Bir sonning 2 baravari 18 ga teng. Bu son nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 18 ni 2 ga bo'ling.",
-        "a": ["9", "9 ta", "to'qqiz"]
-    },
-    {
-        "id": 158,
-        "q": "158. Bir sonning 3 baravari 21 ga teng. Son nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 21 ni 3 ga bo'ling.",
-        "a": ["7", "7 ta", "yetti"]
-    },
-    {
-        "id": 159,
-        "q": "159. Bir sonning 5 baravari 45 ga teng. Son nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 45 ni 5 ga bo'ling.",
-        "a": ["9", "9 ta", "to'qqiz"]
-    },
-    {
-        "id": 160,
-        "q": "160. Bir sonning yarmi 15 ga teng. Son nechchi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 15 ni 2 ga ko'paytiring.",
-        "a": ["30", "30 ta", "o'ttiz"]
-    },
-    {
-        "id": 161,
-        "q": "161. Bir sonning uchdan biri 8 ga teng. Son nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 8 × 3.",
-        "a": ["24", "24 ta", "yigirma to'rt"]
-    },
-    {
-        "id": 162,
-        "q": "162. 4 ta bir xil qalam 20 000 so'm turadi. Bitta qalam qancha?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 20 000 ni 4 ga bo'ling.",
-        "a": ["5000", "5000 so'm", "5 ming"]
-    },
-    {
-        "id": 163,
-        "q": "163. 5 ta daftar 25 000 so'm turadi. Bitta daftar qancha?",
-        "image": "https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=800",
-        "hint": "💡 25 000 ni 5 ga bo'ling.",
-        "a": ["5000", "5000 so'm", "5 ming"]
-    },
-    {
-        "id": 164,
-        "q": "164. 3 ta kitobning har biri 10 000 so'm. Jami qancha?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 10 000 × 3.",
-        "a": ["30000", "30000 so'm", "30 ming"]
-    },
-    {
-        "id": 165,
-        "q": "165. 50 000 so'mingiz bor. 20 000 so'm sarfladingiz. Qancha qoldi?",
-        "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
-        "hint": "💡 50 000 dan 20 000 ni ayiring.",
-        "a": ["30000", "30000 so'm", "30 ming"]
-    },
-    {
-        "id": 166,
-        "q": "166. 100 000 so'mdan 35 000 so'm sarflansa, qancha qoladi?",
-        "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
-        "hint": "💡 Ayirish amalini bajaring.",
-        "a": ["65000", "65000 so'm", "65 ming"]
-    },
-    {
-        "id": 167,
-        "q": "167. 4 ta ruchka 12 000 so'm. 1 ta ruchka qancha?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 12 000 ni 4 ga bo'ling.",
-        "a": ["3000", "3000 so'm", "3 ming"]
-    },
-    {
-        "id": 168,
-        "q": "168. 2 ta daftar 8 000 so'mdan bo'lsa, jami qancha?",
-        "image": "https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=800",
-        "hint": "💡 8 000 × 2.",
-        "a": ["16000", "16000 so'm", "16 ming"]
-    },
-    {
-        "id": 169,
-        "q": "169. 60 000 so'mga 3 ta bir xil narsa olindi. Bittasi qancha?",
-        "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
-        "hint": "💡 60 000 ni 3 ga bo'ling.",
-        "a": ["20000", "20000 so'm", "20 ming"]
-    },
-    {
-        "id": 170,
-        "q": "170. 5 ta futbol to'pi 100 000 so'm bo'lsa, bittasi qancha?",
-        "image": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800",
-        "hint": "💡 100 000 ni 5 ga bo'ling.",
-        "a": ["20000", "20000 so'm", "20 ming"]
-    },
-    {
-        "id": 171,
-        "q": "171. 2 ta ruchka 6 000 so'm. 5 ta ruchka qancha turadi?",
-        "image": "https://images.unsplash.com/photo-1511108690759-009324a90311?w=800",
-        "hint": "💡 Avval bitta ruchka narxini toping.",
-        "a": ["15000", "15000 so'm", "15 ming"]
-    },
-    {
-        "id": 172,
-        "q": "172. 4 ta daftar 20 000 so'm. 6 ta daftar qancha?",
-        "image": "https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=800",
-        "hint": "💡 Bitta daftar narxini toping.",
-        "a": ["30000", "30000 so'm", "30 ming"]
-    },
-    {
-        "id": 173,
-        "q": "173. 10 ta olmaning 30 foizi nechta olma?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 10 ning 30 foizini toping.",
-        "a": ["3", "3 ta", "uchta"]
-    },
-    {
-        "id": 174,
-        "q": "174. 20 ta o'quvchining 25 foizi nechta?",
-        "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-        "hint": "💡 25 foiz = chorak.",
-        "a": ["5", "5 ta", "beshta"]
-    },
-    {
-        "id": 175,
-        "q": "175. 40 ta kitobning 50 foizi nechta?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 50 foiz = yarmi.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 176,
-        "q": "176. 30 ta olmaning uchdan biri nechta?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 30 ni 3 ga bo'ling.",
-        "a": ["10", "10 ta", "o'n"]
-    },
-    {
-        "id": 177,
-        "q": "177. 24 ta konfetning choragi nechta?",
-        "image": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?w=800",
-        "hint": "💡 24 ni 4 ga bo'ling.",
-        "a": ["6", "6 ta", "oltita"]
-    },
-
-    # =========================
-    # 178-207 | ARALASH MANTIQ
-    # =========================
-
-    {
-        "id": 178,
-        "q": "178. 3 ta aka va 2 ta uka bor. Jami nechta bola?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Savolda nechta bola aytilganini sanang.",
-        "a": ["5", "5 ta", "beshta"]
-    },
-    {
-        "id": 179,
-        "q": "179. Bir oilada 4 ta qiz va 1 ta o'g'il bor. Jami nechta farzand?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Qizlar va o'g'ilni qo'shing.",
-        "a": ["5", "5 ta", "beshta"]
-    },
-    {
-        "id": 180,
-        "q": "180. 5 ta odamning har birida 2 tadan oyoq bor. Jami nechta oyoq?",
-        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
-        "hint": "💡 5 × 2.",
-        "a": ["10", "10 ta", "o'nta"]
-    },
-    {
-        "id": 181,
-        "q": "181. 4 ta stolning har birida 4 tadan oyoq bor. Jami nechta oyoq?",
-        "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
-        "hint": "💡 4 × 4.",
-        "a": ["16", "16 ta", "o'n olti"]
-    },
-    {
-        "id": 182,
-        "q": "182. 6 ta stulning har birida 4 tadan oyoq bor. Jami nechta?",
-        "image": "https://images.unsplash.com/photo-1503602642458-232111445657?w=800",
-        "hint": "💡 6 × 4.",
-        "a": ["24", "24 ta", "yigirma to'rt"]
-    },
-    {
-        "id": 183,
-        "q": "183. 10 ta mashinaning har birida 4 ta g'ildirak bor. Jami nechta g'ildirak?",
-        "image": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800",
-        "hint": "💡 10 × 4.",
-        "a": ["40", "40 ta", "qirq"]
-    },
-    {
-        "id": 184,
-        "q": "184. 7 ta velosipedning har birida 2 ta g'ildirak bor. Jami nechta?",
-        "image": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=800",
-        "hint": "💡 7 × 2.",
-        "a": ["14", "14 ta", "o'n to'rt"]
-    },
-    {
-        "id": 185,
-        "q": "185. 3 ta mashinada jami nechta g'ildirak bor?",
-        "image": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800",
-        "hint": "💡 Har bir mashinada 4 ta g'ildirak.",
-        "a": ["12", "12 ta", "o'n ikki"]
-    },
-    {
-        "id": 186,
-        "q": "186. 2 ta mushuk va 3 ta itning jami nechta oyog'i bor?",
-        "image": "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=800",
-        "hint": "💡 Har bir hayvonda 4 ta oyoq.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 187,
-        "q": "187. 5 ta tovuqning jami nechta oyog'i bor?",
-        "image": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800",
-        "hint": "💡 Har bir tovuqda 2 ta oyoq.",
-        "a": ["10", "10 ta", "o'nta"]
-    },
-    {
-        "id": 188,
-        "q": "188. 4 ta o'rdakning jami nechta oyog'i bor?",
-        "image": "https://images.unsplash.com/photo-1555852095-64e7428a9e1d?w=800",
-        "hint": "💡 Har bir o'rdakda 2 ta oyoq.",
-        "a": ["8", "8 ta", "sakkiz"]
-    },
-    {
-        "id": 189,
-        "q": "189. 3 ta sigirning jami nechta oyog'i bor?",
-        "image": "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800",
-        "hint": "💡 Har bir sigirda 4 ta oyoq.",
-        "a": ["12", "12 ta", "o'n ikki"]
-    },
-    {
-        "id": 190,
-        "q": "190. 2 ta ot va 1 ta sigirning jami nechta oyog'i bor?",
-        "image": "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=800",
-        "hint": "💡 Har birida 4 tadan oyoq.",
-        "a": ["12", "12 ta", "o'n ikki"]
-    },
-    {
-        "id": 191,
-        "q": "191. 10 ta quyonning jami nechta qulog'i bor?",
-        "image": "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=800",
-        "hint": "💡 Har bir quyonda 2 ta quloq.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 192,
-        "q": "192. 6 ta odamning jami nechta qo'li bor?",
-        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
-        "hint": "💡 Har bir odamda 2 ta qo'l.",
-        "a": ["12", "12 ta", "o'n ikki"]
-    },
-    {
-        "id": 193,
-        "q": "193. 8 ta odamning jami nechta ko'zi bor?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Har bir odamda 2 ta ko'z.",
-        "a": ["16", "16 ta", "o'n olti"]
-    },
-    {
-        "id": 194,
-        "q": "194. 5 ta odamning jami nechta qulog'i bor?",
-        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
-        "hint": "💡 Har bir odamda 2 ta quloq.",
-        "a": ["10", "10 ta", "o'nta"]
-    },
-    {
-        "id": 195,
-        "q": "195. 4 ta kitobning har biri 3 sm qalin. Jami qalinligi qancha?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 4 × 3.",
-        "a": ["12 sm", "12", "12 santimetr"]
-    },
-    {
-        "id": 196,
-        "q": "196. 5 ta qutining har biri 2 kg. Jami og'irligi qancha?",
-        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
-        "hint": "💡 5 × 2 kg.",
-        "a": ["10 kg", "10", "10 kilogramm"]
-    },
-    {
-        "id": 197,
-        "q": "197. 3 ta shisha idishning har biri 2 litr. Jami necha litr?",
-        "image": "https://images.unsplash.com/photo-1559839914-17aae19cec71?w=800",
-        "hint": "💡 3 × 2.",
-        "a": ["6 litr", "6", "6 l"]
-    },
-    {
-        "id": 198,
-        "q": "198. 2 metr arqonga yana 3 metr qo'shildi. Jami necha metr?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 2 + 3.",
-        "a": ["5 metr", "5", "5 m"]
-    },
-    {
-        "id": 199,
-        "q": "199. 10 metr matodan 4 metri kesildi. Necha metr qoldi?",
-        "image": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800",
-        "hint": "💡 10 - 4.",
-        "a": ["6 metr", "6", "6 m"]
-    },
-    {
-        "id": 200,
-        "q": "200. 15 metr simdan 5 metri ishlatildi. Qancha qoldi?",
-        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
-        "hint": "💡 15 dan 5 ni ayiring.",
-        "a": ["10 metr", "10", "10 m"]
-    },
-    {
-        "id": 201,
-        "q": "201. Bir qutida 12 ta shar bor. 4 ta quti bo'lsa, jami nechta shar?",
-        "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
-        "hint": "💡 12 × 4.",
-        "a": ["48", "48 ta", "qirq sakkiz"]
-    },
-    {
-        "id": 202,
-        "q": "202. 48 ta shar 6 ta bolaga teng bo'lindi. Har bir bola nechta shar oldi?",
-        "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
-        "hint": "💡 48 ni 6 ga bo'ling.",
-        "a": ["8", "8 ta", "sakkiz"]
-    },
-    {
-        "id": 203,
-        "q": "203. 5 ta qutining har birida 8 tadan olma bor. 10 ta olma yeyildi. Nechta qoldi?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Avval jami olmalarni toping.",
-        "a": ["30", "30 ta", "o'ttiz"]
-    },
-    {
-        "id": 204,
-        "q": "204. 4 ta avtobusning har birida 20 tadan yo'lovchi bor. Jami nechta yo'lovchi?",
-        "image": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800",
-        "hint": "💡 4 × 20.",
-        "a": ["80", "80 ta", "sakson"]
-    },
-    {
-        "id": 205,
-        "q": "205. 100 ta kitobning 20 tasi sotildi, keyin yana 10 tasi sotildi. Nechta qoldi?",
-        "image": "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-        "hint": "💡 100 - 20 - 10.",
-        "a": ["70", "70 ta", "yetmish"]
-    },
-    {
-        "id": 206,
-        "q": "206. 5 ta bola 4 tadan konfet oldi. Jami nechta konfet tarqatildi?",
-        "image": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?w=800",
-        "hint": "💡 5 × 4.",
-        "a": ["20", "20 ta", "yigirma"]
-    },
-    {
-        "id": 207,
-        "q": "207. 60 ta olma 10 ta savatga teng taqsimlandi. Har bir savatda nechta olma?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 60 ni 10 ga bo'ling.",
-        "a": ["6", "6 ta", "oltita"]
-    },
-
+        "q": "107. Siz qorong'i xonaga kirdingiz. Xonada gugurt, sham, chiroq va pechka bor. Sizda faqat bitta gugurt bor. Birinchi bo'lib nimani yoqasiz?",
+        "image": "https://images.unsplash.com/photo-1509565840034-3c2f1f4f5f75?w=800",
+        "hint": "💡 Maslahat: Avval olov manbasini yoqish kerak.",
+        "a": ["gugurtni", "gugurt", "avval gugurtni"]
+    }
 ]
