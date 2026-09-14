@@ -1,4 +1,13 @@
-LOGICAL_QUESTIONS += [
+LOGICAL_QUESTIONS = [
+    {
+        "id": 1,
+        "q": "Savol matni...",
+        "a": ["javob"],
+        "hint": "Maslahat...",
+        "image": "https://..."
+    },
+    # qolgan savollar...
+]
 
     # =========================
     # 8-27 | ODDIY MANTIQ
