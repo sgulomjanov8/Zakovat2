@@ -3,6 +3,8 @@ import logging
 import random
 import sqlite3
 import uuid
+import os
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
@@ -50,7 +52,7 @@ def get_top_players(limit=10):
 
 init_db()
 
-# --- MANITIQIY SAVOLLAR BAZASI (Mavzuga mos rasmlar bilan) ---
+# --- MANITIQIY SAVOLLAR BAZASI ---
 LOGICAL_QUESTIONS = [
     {
         "q": "1. Bir kishi yomg'irda soyabonsiz va kalta shlyapasiz yurgan bo'lsa ham, birorta sochi ho'l bo'lmadi. Bu qanday bo'lishi mumkin?",
@@ -534,8 +536,20 @@ async def show_top_players(message: types.Message):
         text += f"{icon} **{name}** — {score} ball\n"
     await message.answer(text)
 
+# --- WEBSERVER (Render talab qiladigan PORT uchun) ---
+async def handle_ping(request):
+    return web.Response(text="Zakovat Bot muvaffaqiyatli ishlayapti!")
+
 async def main():
-    print("Bot muvaffaqiyatli ishga tushdi...")
+    port = int(os.environ.get("PORT", 10000))
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
+    print("Bot va Web Server muvaffaqiyatli ishga tushdi...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
