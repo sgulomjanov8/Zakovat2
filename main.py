@@ -6,21 +6,22 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from groq import Groq
 
-# Loggingni sozlash
+# Logging sozlamalari
 logging.basicConfig(level=logging.INFO)
 
-# 1. API Kalitlar va Bot/Dispatcher e'lon qilish (Bular eng tepada bo'lishi SHART)
+# 1. API Kalitlar va Muhit o'zgaruvchilari (Environment Variables)
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAFAZIWW0kRKnj7cXL3mSkzkwVww5cB_V-E")
 GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY", "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"
 )
 
+# 2. Ob'ektlarni yaratish
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 
-# 2. Groq AI funksiyasi
+# 3. Groq AI orqali matnni formatlash funksiyasi
 def format_rules_with_groq(text: str) -> str:
     """Groq API orqali qoidalar matnini tozalash va chiroyli shaklga keltirish funksiyasi"""
     try:
@@ -38,11 +39,12 @@ def format_rules_with_groq(text: str) -> str:
             model="llama-3.3-70b-versatile",
         )
         return response.choices[0].message.content
-    except Exception:
+    except Exception as e:
+        logging.error(f"Groq API xatoligi: {e}")
         return text
 
 
-# 3. Handlerlar va O'yin logikasi
+# 4. Handlerlar
 @dp.message(F.text == "🚀 O'yinni Boshlash")
 @dp.message(Command("startgame"))
 async def start_game(message: types.Message):
@@ -75,7 +77,7 @@ async def start_game(message: types.Message):
     ]
 
     # Agar o'yinchilar deyarli barcha savollarni yechib bo'lishgan bo'lsa (yoki savol yetmasa),
-    # butun 107 ta savollar bazasini qayta faollashtiramiz
+    # butun savollar bazasini qayta faollashtiramiz
     if len(available_questions) < room["question_count"]:
         available_questions = LOGICAL_QUESTIONS.copy()
 
@@ -117,3 +119,18 @@ async def start_game(message: types.Message):
 
     await asyncio.sleep(5)
     await send_question(room_id)
+
+
+# 5. Botni uzluksiz (24/7) ishga tushirish funksiyasi
+async def main():
+    logging.info("Bot Render'da muvaffaqiyatli ishga tushdi!")
+    # Render'da to'xtab qolmasligi uchun webhook tozalab olinadi
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bot to'xtatildi.")
