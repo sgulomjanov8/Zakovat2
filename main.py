@@ -33,15 +33,24 @@ def get_user_solved(uid):
     return user_solved.get(uid, set())
 
 
+# RASMLI VA MATNLI SAVOLLAR BAZASI
 LOGICAL_QUESTIONS = [
     {
         "id": 1,
-        "question": "O'zi kirmaydi, lekin hammaga yo'l ko'rsatadi. U nima?",
-        "answer": "kalit",
+        "question": "Ushbu suratdagi obyektni va uning mantiqiy ma'nosini toping?",
+        "photo": "https://picsum.photos/800/600",  # Savol rasmining havolasi
+        "answer": "bayroq",
     },
     {
         "id": 2,
+        "question": "O'zi kirmaydi, lekin hammaga yo'l ko'rsatadi. U nima?",
+        "photo": None,
+        "answer": "kalit",
+    },
+    {
+        "id": 3,
         "question": "Suvda cho'kmaydi, otda o'lmaydi. U nima?",
+        "photo": None,
         "answer": "muz",
     },
 ]
@@ -74,7 +83,7 @@ def format_rules_with_groq(text: str) -> str:
         return text
 
 
-# Savolni yuborish va taymer funksiyasi
+# SAVOLNI YUBORISH (RASMLI YOKI MATNLI)
 async def send_question(room_id):
     if room_id not in rooms:
         return
@@ -90,12 +99,31 @@ async def send_question(room_id):
 
     current_q = room["questions"].pop(0)
     q_text = f"❓ **SAVOL:**\n\n{current_q['question']}\n\n⏱ Javob berish uchun 1 daqiqa 50 soniya bor!"
+    photo_url = current_q.get("photo")
 
-    if room["is_group"]:
-        await bot.send_message(room["chat_id"], q_text, parse_mode="Markdown")
-    else:
-        for m_id in room["members"].keys():
-            await bot.send_message(m_id, q_text, parse_mode="Markdown")
+    targets = (
+        [room["chat_id"]]
+        if room["is_group"]
+        else list(room["members"].keys())
+    )
+
+    for target in targets:
+        try:
+            if photo_url:
+                # Agar savolda rasm bo'lsa, rasm bilan yuboradi
+                await bot.send_photo(
+                    chat_id=target,
+                    photo=photo_url,
+                    caption=q_text,
+                    parse_mode="Markdown",
+                )
+            else:
+                # Agar rasm bo'lmasa, faqat matn yuboradi
+                await bot.send_message(
+                    chat_id=target, text=q_text, parse_mode="Markdown"
+                )
+        except Exception as e:
+            logging.error(f"Xabar yuborishda xatolik ({target}): {e}")
 
 
 # Handlers
@@ -115,7 +143,6 @@ async def cmd_start(message: types.Message):
     )
 
 
-# Yangi xona yaratish va Sinf tanlash tugmalari
 @dp.message(F.text == "➕ Yangi Xona Yaratish")
 @dp.message(Command("game"))
 async def create_room(message: types.Message):
@@ -134,7 +161,6 @@ async def create_room(message: types.Message):
     }
     user_room[user_id] = room_id
 
-    # Sinf tanlash tugmalari (Inline)
     class_kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -180,7 +206,6 @@ async def create_room(message: types.Message):
     )
 
 
-# Sinf tanlangach, Savollar sonini tanlash
 @dp.callback_query(F.data.startswith("setclass_"))
 async def process_class_select(callback: types.CallbackQuery):
     selected_class = callback.data.split("_")[1]
@@ -232,7 +257,6 @@ async def process_count_select(callback: types.CallbackQuery):
     )
 
 
-# O'yinni boshlash va 5 soniyadan so'ng savol yuborish
 @dp.message(F.text == "🚀 O'yinni Boshlash")
 @dp.message(Command("startgame"))
 async def start_game(message: types.Message):
@@ -255,7 +279,6 @@ async def start_game(message: types.Message):
         )
         return
 
-    # Savollarni tayyorlash va aralashtirish
     all_solved = set()
     for uid in room["members"].keys():
         all_solved.update(get_user_solved(uid))
@@ -286,11 +309,10 @@ async def start_game(message: types.Message):
         f"🚀 **O'yin 5 soniyadan so'ng boshlanadi. Muvaffaqiyat tilaymiz!**"
     )
 
-    # Groq AI orqali formatlash
     rules_text = format_rules_with_groq(raw_rules_text)
     await message.answer(rules_text, parse_mode="Markdown")
 
-    # 5 soniya kutish va birinchi savolni yuborish
+    # 5 soniya kutib, birinchi savolni yuborish (rasmli bo'lsa rasmi bilan)
     await asyncio.sleep(5)
     await send_question(room_id)
 
