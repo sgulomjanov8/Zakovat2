@@ -1,5 +1,6 @@
 import os
 import asyncio
+import random
 from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
@@ -14,13 +15,13 @@ from telegram.ext import (
     ContextTypes
 )
 
-# questions.py faylidan savollar va check_answer funksiyasini import qilamiz
+# questions.py faylingizdan savollar va javobni tekshirish funksiyasi
 from questions import LOGICAL_QUESTIONS, check_answer
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Web Server (Render 24/7 ishlashi uchun)
+# Web Server (Render'da 24/7 ishlashi uchun)
 app = Flask('')
 
 @app.route('/')
@@ -35,32 +36,45 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- HELPER FUNKSIYALAR ---
+# --- MENYULAR ---
+
+def get_class_keyboard():
+    """5-sinfdan 11-sinfgacha va Aralash menyusi"""
+    keyboard = [
+        [InlineKeyboardButton("5-sinf", callback_data="class_5"), InlineKeyboardButton("6-sinf", callback_data="class_6")],
+        [InlineKeyboardButton("7-sinf", callback_data="class_7"), InlineKeyboardButton("8-sinf", callback_data="class_8")],
+        [InlineKeyboardButton("9-sinf", callback_data="class_9"), InlineKeyboardButton("10-sinf", callback_data="class_10")],
+        [InlineKeyboardButton("11-sinf", callback_data="class_11"), InlineKeyboardButton("🎲 Barchasi (Aralash)", callback_data="class_all")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 def get_count_keyboard():
+    """Savollar sonini tanlash menyusi"""
     keyboard = [
         [InlineKeyboardButton("3 ta savol", callback_data="count_3"), InlineKeyboardButton("5 ta savol", callback_data="count_5")],
         [InlineKeyboardButton("10 ta savol", callback_data="count_10"), InlineKeyboardButton("15 ta savol", callback_data="count_15")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
+# --- START BUYRUG'I ---
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text(
-        "Xush kelibsiz! O'yinni boshlash uchun savollar sonini tanlang:",
-        reply_markup=get_count_keyboard()
+        "👋 **Xush kelibsiz!** O'yinni boshlash uchun kerakli **sinfni** tanlang:",
+        reply_markup=get_class_keyboard(),
+        parse_mode="Markdown"
     )
 
-# --- TAYMER VAZIFASI ---
+# --- TAYMER VAZIFASI (1:50 SANAYDI) ---
 
 async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
-    """Xabarni har soniyada tahrirlab vaqtni ko'rsatadi"""
     try:
         while total_seconds > 0:
             await asyncio.sleep(1)
             total_seconds -= 1
             
-            # Agar foydalanuvchi javob berib bo'lgan bo'lsa taymerni to'xtatamiz
+            # Agar foydalanuvchi javob berib bo'lsa, taymer to'xtaydi
             if not context.user_data.get("is_answering", False):
                 return
             
@@ -85,7 +99,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
                     parse_mode="HTML"
                 )
             except Exception:
-                pass # Agar matn o'zgarmagan bo'lsa telegram xatolik berishini o'tkazib yuboramiz
+                pass
 
         # Vaqt tugasa
         if context.user_data.get("is_answering", False):
@@ -100,13 +114,13 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
     except asyncio.CancelledError:
         pass
 
-# --- SAVOLLARNI BERISH ---
+# --- SAVOL BERISH ---
 
 async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     q_index = context.user_data.get("q_index", 0)
     selected_questions = context.user_data.get("questions", [])
     
-    # O'yin tugaganini tekshirish
+    # O'yin yakunlansa
     if q_index >= len(selected_questions):
         score = context.user_data.get("score", 0)
         total = len(selected_questions)
@@ -116,10 +130,10 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
             text=(
                 f"🎉 <b>O'yin yakunlandi!</b>\n\n"
                 f"📊 <b>Natijangiz:</b> siz {total} ta savoldan <b>{score}</b> tasiga to'g'ri javob berdingiz!\n\n"
-                f"Qayta o'ynash uchun sonni tanlang:"
+                f"Qayta o'ynash uchun sinfni tanlang:"
             ),
             parse_mode="HTML",
-            reply_markup=get_count_keyboard()
+            reply_markup=get_class_keyboard()
         )
         return
 
@@ -133,7 +147,6 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         f"⏱ <b>Qolgan vaqt:</b> 1:50"
     )
     
-    # Rasm va savolni yuborish
     msg = await context.bot.send_photo(
         chat_id=chat_id,
         photo=q_data["image"],
@@ -141,39 +154,57 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         parse_mode="HTML"
     )
     
-    # Oldingi taymerni bekor qilish va yangisini ishga tushirish (110 soniya = 1 daqiqa 50 soniya)
+    # Eski taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqish
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
     task = asyncio.create_task(timer_task(context, chat_id, msg.message_id, 110))
     context.user_data["timer_task"] = task
 
-# --- CALLBACK QO'NG'IROQLARI (TUGMALAR) ---
+# --- TUGMA HODISALARI ---
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    if query.data.startswith("count_"):
-        count = int(query.data.split("_")[1])
+    # 1. Sinf tanlanganda
+    if query.data.startswith("class_"):
+        selected_class = query.data.split("_")[1]
+        context.user_data["selected_class"] = selected_class
         
-        import random
-        # questions.py faylidagi savollardan tasodifiy tanlab olamiz
+        class_title = f"{selected_class}-sinf" if selected_class != "all" else "Barcha sinflar"
+        await query.message.edit_text(
+            f"✅ **{class_title}** tanlandi!\nEndi **savollar sonini** tanlang:",
+            reply_markup=get_count_keyboard(),
+            parse_mode="Markdown"
+        )
+        
+    # 2. Savollar soni tanlanganda
+    elif query.data.startswith("count_"):
+        count = int(query.data.split("_")[1])
+        selected_class = context.user_data.get("selected_class", "all")
+        
         all_q = LOGICAL_QUESTIONS.copy()
+        
+        # Sinf bo'yicha filterlash (agar questions.py ichida "class" kaliti bo'lsa)
+        if selected_class != "all":
+            filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
+            if filtered_q:
+                all_q = filtered_q
+
         random.shuffle(all_q)
         
         context.user_data["questions"] = all_q[:count]
         context.user_data["q_index"] = 0
         context.user_data["score"] = 0
-        context.user_data["total_q"] = count
+        context.user_data["total_q"] = min(count, len(all_q))
         
         await query.message.delete()
         await ask_next_question(context, query.message.chat_id)
 
-# --- JAVOBLARNI TEKSHIRISH ---
+# --- JAVOB TEKSHIRISH ---
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Agar foydalanuvchi hozir savolga javob berish bosqichida bo'lmasa
     if not context.user_data.get("is_answering", False):
         return
 
@@ -183,7 +214,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not current_q:
         return
         
-    # Taymerni to'xtatamiz
     context.user_data["is_answering"] = False
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
@@ -204,11 +234,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["q_index"] += 1
     await ask_next_question(context, update.message.chat_id)
 
-# --- MAIN ---
+# --- ASOSIY ISHGA TUSHIRISH ---
 
 def main():
     keep_alive()
-    
     app_bot = Application.builder().token(TOKEN).build()
     
     app_bot.add_handler(CommandHandler("start", start_command))
