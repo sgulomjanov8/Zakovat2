@@ -21,7 +21,7 @@ from questions import LOGICAL_QUESTIONS, check_answer
 load_dotenv()
 
 # Telegram Bot Tokeni
-TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAGmqCD8e-fdVh-XOaEXpPEr_ZHXvuvC6bw")
+TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
 
 # Render 24/7 ishlashi uchun Flask Web Server
 app = Flask('')
