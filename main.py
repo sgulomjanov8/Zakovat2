@@ -19,9 +19,11 @@ from telegram.ext import (
 from questions import LOGICAL_QUESTIONS, check_answer
 
 load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
 
-# Web Server (Render'da 24/7 ishlashi uchun)
+# Telegram Bot Tokeni
+TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAGmqCD8e-fdVh-XOaEXpPEr_ZHXvuvC6bw")
+
+# Render 24/7 ishlashi uchun Flask Web Server
 app = Flask('')
 
 @app.route('/')
@@ -74,7 +76,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             await asyncio.sleep(1)
             total_seconds -= 1
             
-            # Agar foydalanuvchi javob berib bo'lsa, taymer to'xtaydi
+            # Foydalanuvchi javob bergan bo'lsa taymer to'xtaydi
             if not context.user_data.get("is_answering", False):
                 return
             
@@ -154,7 +156,7 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         parse_mode="HTML"
     )
     
-    # Eski taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqish
+    # Oldingi taymerni bekor qilib, yangi 110 soniyalik (1:50) taymerni yoqadi
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
@@ -186,7 +188,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         all_q = LOGICAL_QUESTIONS.copy()
         
-        # Sinf bo'yicha filterlash (agar questions.py ichida "class" kaliti bo'lsa)
+        # Sinf bo'yicha saralash
         if selected_class != "all":
             filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
             if filtered_q:
@@ -218,7 +220,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
 
-    # questions.py faylidagi check_answer orqali tekshirish
+    # questions.py faylidagi check_answer orqali tekshiradi
     is_correct = check_answer(user_text, current_q["a"])
     
     if is_correct:
@@ -234,7 +236,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["q_index"] += 1
     await ask_next_question(context, update.message.chat_id)
 
-# --- ASOSIY ISHGA TUSHIRISH ---
+# --- ISHGA TUSHIRISH ---
 
 def main():
     keep_alive()
