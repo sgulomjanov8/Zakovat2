@@ -4,13 +4,14 @@ import os
 import random
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiohttp import web
 from groq import Groq
 
 # Logging sozlamalari
 logging.basicConfig(level=logging.INFO)
 
-# 1. API Kalitlar va Muhit o'zgaruvchilari
+# API Kalitlar
 BOT_TOKEN = os.getenv(
     "BOT_TOKEN", "8851685095:AAGdY98HQeT9mksQW73XO0pS7fsYYbF5GP0"
 )
@@ -18,12 +19,11 @@ GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY", "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"
 )
 
-# 2. Ob'ektlarni yaratish
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 groq_client = Groq(api_key=GROQ_API_KEY)
 
-# Xotira bazasi (Xonalar va O'yinchilar)
+# Ma'lumotlar xotirasi
 rooms = {}
 user_room = {}
 user_solved = {}
@@ -33,7 +33,6 @@ def get_user_solved(uid):
     return user_solved.get(uid, set())
 
 
-# Test uchun namuna savollar bazasi
 LOGICAL_QUESTIONS = [
     {
         "id": 1,
@@ -48,14 +47,13 @@ LOGICAL_QUESTIONS = [
 ]
 
 
-# 3. Render Web Service uchun HTTP server (24/7 ishlashi uchun)
+# Render uchun Web Server (24/7 Live uchun)
 async def handle_ping(request):
     return web.Response(text="Bot is running 24/7!")
 
 
-# 4. Groq AI orqali matnni formatlash funksiyasi
+# Groq AI orqali qoidalarni formatlash
 def format_rules_with_groq(text: str) -> str:
-    """Groq AI orqali qoidalar va nizomni chiroyli ko'rinishga keltirish"""
     try:
         response = groq_client.chat.completions.create(
             messages=[
@@ -64,7 +62,7 @@ def format_rules_with_groq(text: str) -> str:
                     "content": (
                         "Ushbu Telegram o'yin qoidalaridagi keraksiz chalkashliklarni tozalab, "
                         "Telegram Markdown formatida (qalin matnlar uchun ** foydalanib) "
-                        f"chiroyli, ta'sirli va o'qishga qulay ko'rinishga keltirib ber:\n\n{text}"
+                        f"chiroyli va o'qishga qulay ko'rinishga keltirib ber:\n\n{text}"
                     ),
                 }
             ],
@@ -76,9 +74,31 @@ def format_rules_with_groq(text: str) -> str:
         return text
 
 
-# 5. Handlerlar (Buyruqlar va Tugmalar)
+# Savolni yuborish va taymer funksiyasi
+async def send_question(room_id):
+    if room_id not in rooms:
+        return
+    room = rooms[room_id]
+
+    if not room["questions"]:
+        await bot.send_message(
+            room["chat_id"],
+            "🏁 **O'yin o'z nihoyasiga yetdi! Qatnashganingiz uchun rahmat.**",
+            parse_mode="Markdown",
+        )
+        return
+
+    current_q = room["questions"].pop(0)
+    q_text = f"❓ **SAVOL:**\n\n{current_q['question']}\n\n⏱ Javob berish uchun 1 daqiqa 50 soniya bor!"
+
+    if room["is_group"]:
+        await bot.send_message(room["chat_id"], q_text, parse_mode="Markdown")
+    else:
+        for m_id in room["members"].keys():
+            await bot.send_message(m_id, q_text, parse_mode="Markdown")
 
 
+# Handlers
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     kb = types.ReplyKeyboardMarkup(
@@ -89,12 +109,13 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True,
     )
     await message.answer(
-        "👋 **Zakovat Quiz Botiga xush kelibsiz!**\n\nO'yinni boshlash uchun quyidagi tugmalardan birini tanlang:",
+        "👋 **Zakovat Quiz Botiga xush kelibsiz!**",
         reply_markup=kb,
         parse_mode="Markdown",
     )
 
 
+# Yangi xona yaratish va Sinf tanlash tugmalari
 @dp.message(F.text == "➕ Yangi Xona Yaratish")
 @dp.message(Command("game"))
 async def create_room(message: types.Message):
@@ -108,20 +129,110 @@ async def create_room(message: types.Message):
         "question_count": 5,
         "questions": [],
         "is_started": False,
-        "is_group": False,
+        "is_group": message.chat.type != "private",
         "chat_id": message.chat.id,
     }
     user_room[user_id] = room_id
 
+    # Sinf tanlash tugmalari (Inline)
+    class_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="5-sinf", callback_data="setclass_5-sinf"
+                ),
+                InlineKeyboardButton(
+                    text="6-sinf", callback_data="setclass_6-sinf"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="7-sinf", callback_data="setclass_7-sinf"
+                ),
+                InlineKeyboardButton(
+                    text="8-sinf", callback_data="setclass_8-sinf"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="9-sinf", callback_data="setclass_9-sinf"
+                ),
+                InlineKeyboardButton(
+                    text="10-sinf", callback_data="setclass_10-sinf"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="11-sinf", callback_data="setclass_11-sinf"
+                )
+            ],
+        ]
+    )
+
+    invite_url = f"https://t.me/MY_Zakovat_Quiz_Bot?start={room_id}"
     await message.answer(
         f"✨ **Yangi xona yaratildi!**\n\n"
         f"👤 **Kapitan:** {message.from_user.full_name}\n"
-        f"⚙️ **Sozlama:** 7-sinf, 5 ta savol.\n\n"
-        f"O'yinni boshlash uchun **🚀 O'yinni Boshlash** tugmasini bosing!",
+        f"🔗 **Do'stlarni taklif qilish:** {invite_url}\n\n"
+        f"📌 **Sinfni tanlang:**",
+        reply_markup=class_kb,
         parse_mode="Markdown",
     )
 
 
+# Sinf tanlangach, Savollar sonini tanlash
+@dp.callback_query(F.data.startswith("setclass_"))
+async def process_class_select(callback: types.CallbackQuery):
+    selected_class = callback.data.split("_")[1]
+    user_id = callback.from_user.id
+    room_id = user_room.get(user_id)
+
+    if room_id in rooms:
+        rooms[room_id]["class"] = selected_class
+
+    count_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="5 ta savol", callback_data="setcount_5"
+                ),
+                InlineKeyboardButton(
+                    text="10 ta savol", callback_data="setcount_10"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="15 ta savol", callback_data="setcount_15"
+                )
+            ],
+        ]
+    )
+    await callback.message.edit_text(
+        f"✅ Sinf: **{selected_class}** tanlandi.\n\n🔢 **Endi savollar sonini belgilang:**",
+        reply_markup=count_kb,
+        parse_mode="Markdown",
+    )
+
+
+@dp.callback_query(F.data.startswith("setcount_"))
+async def process_count_select(callback: types.CallbackQuery):
+    count = int(callback.data.split("_")[1])
+    user_id = callback.from_user.id
+    room_id = user_room.get(user_id)
+
+    if room_id in rooms:
+        rooms[room_id]["question_count"] = count
+
+    await callback.message.edit_text(
+        f"⚙️ **Sozlamalar saqlandi!**\n\n"
+        f"📚 Sinf: **{rooms[room_id]['class']}**\n"
+        f"🔢 Savollar soni: **{count} ta**\n\n"
+        f"Tayyor bo'lsangiz, **🚀 O'yinni Boshlash** tugmasini bosing!",
+        parse_mode="Markdown",
+    )
+
+
+# O'yinni boshlash va 5 soniyadan so'ng savol yuborish
 @dp.message(F.text == "🚀 O'yinni Boshlash")
 @dp.message(Command("startgame"))
 async def start_game(message: types.Message):
@@ -130,7 +241,7 @@ async def start_game(message: types.Message):
 
     if not room_id or room_id not in rooms:
         await message.answer(
-            "⚠️ Iltimos, avval **➕ Yangi Xona Yaratish** tugmasini bosing!",
+            "⚠️ Iltimos, **➕ Yangi Xona Yaratish** tugmasi orqali xona yarating!",
             parse_mode="Markdown",
         )
         return
@@ -144,7 +255,7 @@ async def start_game(message: types.Message):
         )
         return
 
-    # Savollarni tayyorlash
+    # Savollarni tayyorlash va aralashtirish
     all_solved = set()
     for uid in room["members"].keys():
         all_solved.update(get_user_solved(uid))
@@ -152,7 +263,6 @@ async def start_game(message: types.Message):
     available_questions = [
         q for q in LOGICAL_QUESTIONS if q.get("id") not in all_solved
     ]
-
     if len(available_questions) < room["question_count"]:
         available_questions = LOGICAL_QUESTIONS.copy()
 
@@ -173,17 +283,18 @@ async def start_game(message: types.Message):
         f"🏆 **Ball berish tartibi:**\n"
         f"🥇 **1-bo'lib to'g'ri javob bergan o'yinchi:** 2 Ball\n"
         f"🥈 **Keyingi to'g'ri javob berganlar:** 1 Ball\n\n"
-        f"🚀 **O'yin tez orada boshlanadi. Muvaffaqiyat tilaymiz!**"
+        f"🚀 **O'yin 5 soniyadan so'ng boshlanadi. Muvaffaqiyat tilaymiz!**"
     )
 
-    # Groq AI orqali matnni chiroyli formatlash
-    await message.answer("🤖 *Groq AI qoidalarni formatlamoqda...*", parse_mode="Markdown")
+    # Groq AI orqali formatlash
     rules_text = format_rules_with_groq(raw_rules_text)
-
     await message.answer(rules_text, parse_mode="Markdown")
 
+    # 5 soniya kutish va birinchi savolni yuborish
+    await asyncio.sleep(5)
+    await send_question(room_id)
 
-# 6. Asosiy ishga tushirish funksiyasi
+
 async def main():
     port = int(os.environ.get("PORT", 8080))
     app = web.Application()
@@ -194,7 +305,6 @@ async def main():
     await site.start()
 
     logging.info(f"Port {port} da Web Server va Bot ishga tushdi!")
-
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
