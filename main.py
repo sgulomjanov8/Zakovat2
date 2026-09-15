@@ -6,22 +6,34 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from groq import Groq
 
-# Logging sozlamalari
+# 1. Logging sozlamalari
 logging.basicConfig(level=logging.INFO)
 
-# 1. API Kalitlar va Muhit o'zgaruvchilari (Environment Variables)
+# 2. API Kalitlar va Muhit o'zgaruvchilari (Environment Variables)
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAFAZIWW0kRKnj7cXL3mSkzkwVww5cB_V-E")
-GROQ_API_KEY = os.getenv(
-    "GROQ_API_KEY", "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"
-)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 
-# 2. Ob'ektlarni yaratish
+# 3. Bot va Groq ob'ektlarini yaratish
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 groq_client = Groq(api_key=GROQ_API_KEY)
 
+# --- LOYIHA UCHUN ZARUR O'ZGARUVCHILAR VA MOCK-FUNKSIYALAR ---
+# (Agar bular boshqa fayldan import qilinsa, importlarni shu yerga qo'ying)
+user_room = user_room if 'user_room' in globals() else {}
+rooms = rooms if 'rooms' in globals() else {}
+LOGICAL_QUESTIONS = LOGICAL_QUESTIONS if 'LOGICAL_QUESTIONS' in globals() else []
 
-# 3. Groq AI orqali matnni formatlash funksiyasi
+if 'get_user_solved' not in globals():
+    def get_user_solved(uid):
+        return set()
+
+if 'send_question' not in globals():
+    async def send_question(room_id):
+        pass
+
+
+# 4. Groq AI orqali matnni formatlash funksiyasi
 def format_rules_with_groq(text: str) -> str:
     """Groq API orqali qoidalar matnini tozalash va chiroyli shaklga keltirish funksiyasi"""
     try:
@@ -44,7 +56,7 @@ def format_rules_with_groq(text: str) -> str:
         return text
 
 
-# 4. Handlerlar
+# 5. Handlerlar va O'yin Logikasi
 @dp.message(F.text == "🚀 O'yinni Boshlash")
 @dp.message(Command("startgame"))
 async def start_game(message: types.Message):
@@ -59,7 +71,7 @@ async def start_game(message: types.Message):
 
     room = rooms[room_id]
 
-    if user_id != room["captain"]:
+    if user_id != room.get("captain"):
         await message.answer(
             "⚠️ O'yinni faqat xonani yaratgan **Kapitan** boshlay oladi!",
             parse_mode="Markdown",
@@ -68,7 +80,7 @@ async def start_game(message: types.Message):
 
     # --- HAR SAFAR HAR XIL (RANDOM) VA YECHILMAGAN SAVOLLARNI TANLASH ---
     all_solved = set()
-    for uid in room["members"].keys():
+    for uid in room.get("members", {}).keys():
         all_solved.update(get_user_solved(uid))
 
     # Xonadagilar hali yechmagan savollarni ajratamiz
@@ -76,52 +88,51 @@ async def start_game(message: types.Message):
         q for q in LOGICAL_QUESTIONS if q.get("id") not in all_solved
     ]
 
-    # Agar o'yinchilar deyarli barcha savollarni yechib bo'lishgan bo'lsa (yoki savol yetmasa),
-    # butun savollar bazasini qayta faollashtiramiz
-    if len(available_questions) < room["question_count"]:
+    # Agar savollar yetmasa, butun savollar bazasini qayta faollashtiramiz
+    if len(available_questions) < room.get("question_count", 5):
         available_questions = LOGICAL_QUESTIONS.copy()
 
-    # SAVOLLARNI ARALASHTIRISH (Har safar har xil bo'ladi)
+    # SAVOLLARNI ARALASHTIRISH
     random.shuffle(available_questions)
 
-    # Tanlangan savollar soniga qarab qirqib olamiz (masalan, 5 yoki 10 ta)
-    room["questions"] = available_questions[: room["question_count"]]
-
+    # Tanlangan savollar soniga qarab qirqib olamiz
+    room["questions"] = available_questions[: room.get("question_count", 5)]
     room["is_started"] = True
-    members_count = len(room["members"])
+    
+    members_count = len(room.get("members", {}))
     members_text = ", ".join(
-        [f"**{name}**" for name in room["members"].values()]
+        [f"**{name}**" for name in room.get("members", {}).values()]
     )
 
     raw_rules_text = (
         f"📜 **ZAKOVAT O'YINI QOIDALARI VA NIZOMI:**\n\n"
-        f"🎯 **Kategoriya:** {room['class']}\n"
-        f"🔢 **Savollar soni:** {room['question_count']} ta\n"
+        f"🎯 **Kategoriya:** {room.get('class', 'Aralash')}\n"
+        f"🔢 **Savollar soni:** {room.get('question_count', 5)} ta\n"
         f"👥 **Qatnashchilar ({members_count} kishi):** {members_text}\n\n"
         f"🏆 **Ball berish tartibi:**\n"
         f"🥇 **1-bo'lib to'g'ri javob bergan o'yinchi:** 2 Ball\n"
         f"🥈 **2, 3, 4, 5...-bo'lib to'g'ri javob berganlar:** 1 Ball\n\n"
         f"⏱ **Vaqt:** Har bir savol uchun 1 daqiqa 50 soniya beriladi.\n"
-        f"🤫 Javobingizni chatga yozing, vaqt tugagach yoki hamma javob berib bo'lgach natija e'lon qilinadi!\n\n"
+        f"🤫 Javobingizni chatga yozing, vaqt tugagach yoki hamma javob berib bo me'yorida e'lon qilinadi!\n\n"
         f"🚀 **O'yin 5 soniyadan so'ng boshlanadi. Muvaffaqiyat tilaymiz!**"
     )
 
     # Groq API orqali matnni chiroyli ko'rinishga keltirish
     rules_text = format_rules_with_groq(raw_rules_text)
 
-    if room["is_group"]:
+    if room.get("is_group"):
         await bot.send_message(
             room["chat_id"], rules_text, parse_mode="Markdown"
         )
     else:
-        for m_id in room["members"].keys():
+        for m_id in room.get("members", {}).keys():
             await bot.send_message(m_id, rules_text, parse_mode="Markdown")
 
     await asyncio.sleep(5)
     await send_question(room_id)
 
 
-# 5. Botni uzluksiz (24/7) ishga tushirish funksiyasi
+# 6. Botni uzluksiz (24/7) ishga tushirish funksiyasi
 async def main():
     logging.info("Bot Render'da muvaffaqiyatli ishga tushdi!")
     # Render'da to'xtab qolmasligi uchun webhook tozalab olinadi
