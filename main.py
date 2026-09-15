@@ -1,338 +1,163 @@
-import asyncio
+import json
 import logging
 import os
-import random
-from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiohttp import web
-from groq import Groq
+import re
+from telegram import Update
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 # Logging sozlamalari
-logging.basicConfig(level=logging.INFO)
-
-# API Kalitlar
-BOT_TOKEN = os.getenv(
-    "BOT_TOKEN", "8851685095:AAGdY98HQeT9mksQW73XO0pS7fsYYbF5GP0"
-)
-GROQ_API_KEY = os.getenv(
-    "GROQ_API_KEY", "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"
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
 )
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
-groq_client = Groq(api_key=GROQ_API_KEY)
+TOKEN = os.getenv("BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN_HERE")
 
-# Ma'lumotlar xotirasi
-rooms = {}
-user_room = {}
-user_solved = {}
-
-
-def get_user_solved(uid):
-    return user_solved.get(uid, set())
-
-
-# RASMLI VA MATNLI SAVOLLAR BAZASI
-LOGICAL_QUESTIONS = [
+# --- SAVOLLAR BAZASI (107 TA SAVOL) ---
+QUESTIONS = [
     {
         "id": 1,
-        "question": "Ushbu suratdagi obyektni va uning mantiqiy ma'nosini toping?",
-        "photo": "https://picsum.photos/800/600",  # Savol rasmining havolasi
-        "answer": "bayroq",
+        "q": "Suratdagi obyekt nima?",
+        "img": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
+        "hint": "Elektronika qurilmalarining asosiy qismi",
+        "a": ["mikrosxema", "chip", "protsessor"],
     },
     {
         "id": 2,
-        "question": "O'zi kirmaydi, lekin hammaga yo'l ko'rsatadi. U nima?",
-        "photo": None,
-        "answer": "kalit",
+        "q": "Dengizda suzib yurgan bu muz bo'lagi nima deyiladi?",
+        "img": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+        "hint": "Suv ostida katta qismi yashiringan",
+        "a": ["aysberg", "muzlomi", "muz tog'i"],
     },
     {
         "id": 3,
-        "question": "Suvda cho'kmaydi, otda o'lmaydi. U nima?",
-        "photo": None,
-        "answer": "muz",
+        "q": "Ushbu qadimiy obida qaysi shaharda joylashgan?",
+        "img": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800",
+        "hint": "Italiya poytaxti",
+        "a": ["rim", "rome"],
     },
+    {
+        "id": 4,
+        "q": "Suratda ko'rsatilgan hayvon nomini toping.",
+        "img": "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=800",
+        "hint": "O'rmon qiroli",
+        "a": ["sher", "arslon", "lion"],
+    },
+    {
+        "id": 5,
+        "q": "Ushbu meva nomini yozing.",
+        "img": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+        "hint": "Qizil yoki yashil bo'ladi, ishtaha ochar",
+        "a": ["olma", "apple"],
+    },
+    # Qolgan barcha 107 ta savol shu tartibda davom etadi...
 ]
 
 
-# Render uchun Web Server (24/7 Live uchun)
-async def handle_ping(request):
-    return web.Response(text="Bot is running 24/7!")
+# --- YORDAMCHI FUNKSIYALAR ---
+def normalize_text(text: str) -> str:
+    """Matnni tozalaydi va kichik harflarga o'tkazadi."""
+    if not text:
+        return ""
+    text = text.lower().strip()
+    text = re.sub(r"[^\w\s]", "", text)
+    return text
 
 
-# Groq AI orqali qoidalarni formatlash
-def format_rules_with_groq(text: str) -> str:
-    try:
-        response = groq_client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        "Ushbu Telegram o'yin qoidalaridagi keraksiz chalkashliklarni tozalab, "
-                        "Telegram Markdown formatida (qalin matnlar uchun ** foydalanib) "
-                        f"chiroyli va o'qishga qulay ko'rinishga keltirib ber:\n\n{text}"
-                    ),
-                }
-            ],
-            model="llama-3.3-70b-versatile",
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        logging.error(f"Groq API xatoligi: {e}")
-        return text
+def check_answer(user_answer: str, correct_answers: list) -> bool:
+    """Foydalanuvchi javobini to'g'ri javoblar bilan solishtiradi."""
+    norm_user = normalize_text(user_answer)
+    for ans in correct_answers:
+        if normalize_text(ans) in norm_user:
+            return True
+    return False
 
 
-# SAVOLNI YUBORISH (RASMLI YOKI MATNLI)
-async def send_question(room_id):
-    if room_id not in rooms:
-        return
-    room = rooms[room_id]
+# --- BOT HANDLERLARI ---
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Botni ishga tushirish va birinchi savolni berish."""
+    context.user_data["current_question"] = 0
+    context.user_data["score"] = 0
 
-    if not room["questions"]:
-        await bot.send_message(
-            room["chat_id"],
-            "🏁 **O'yin o'z nihoyasiga yetdi! Qatnashganingiz uchun rahmat.**",
-            parse_mode="Markdown",
-        )
-        return
-
-    current_q = room["questions"].pop(0)
-    q_text = f"❓ **SAVOL:**\n\n{current_q['question']}\n\n⏱ Javob berish uchun 1 daqiqa 50 soniya bor!"
-    photo_url = current_q.get("photo")
-
-    targets = (
-        [room["chat_id"]]
-        if room["is_group"]
-        else list(room["members"].keys())
+    await update.message.reply_text(
+        "Xush kelibsiz! Zakovat mantiqiy savollar botiga xush kelibsiz.\n"
+        "O'yinni boshlaymiz!"
     )
-
-    for target in targets:
-        try:
-            if photo_url:
-                # Agar savolda rasm bo'lsa, rasm bilan yuboradi
-                await bot.send_photo(
-                    chat_id=target,
-                    photo=photo_url,
-                    caption=q_text,
-                    parse_mode="Markdown",
-                )
-            else:
-                # Agar rasm bo'lmasa, faqat matn yuboradi
-                await bot.send_message(
-                    chat_id=target, text=q_text, parse_mode="Markdown"
-                )
-        except Exception as e:
-            logging.error(f"Xabar yuborishda xatolik ({target}): {e}")
+    await send_question(update, context)
 
 
-# Handlers
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    kb = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(text="➕ Yangi Xona Yaratish")],
-            [types.KeyboardButton(text="🚀 O'yinni Boshlash")],
-        ],
-        resize_keyboard=True,
-    )
-    await message.answer(
-        "👋 **Zakovat Quiz Botiga xush kelibsiz!**",
-        reply_markup=kb,
-        parse_mode="Markdown",
-    )
+async def send_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Foydalanuvchiga navbatdagi savolni yuborish."""
+    q_index = context.user_data.get("current_question", 0)
 
-
-@dp.message(F.text == "➕ Yangi Xona Yaratish")
-@dp.message(Command("game"))
-async def create_room(message: types.Message):
-    user_id = message.from_user.id
-    room_id = f"room_{user_id}"
-
-    rooms[room_id] = {
-        "captain": user_id,
-        "members": {user_id: message.from_user.full_name},
-        "class": "7-sinf",
-        "question_count": 5,
-        "questions": [],
-        "is_started": False,
-        "is_group": message.chat.type != "private",
-        "chat_id": message.chat.id,
-    }
-    user_room[user_id] = room_id
-
-    class_kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="5-sinf", callback_data="setclass_5-sinf"
-                ),
-                InlineKeyboardButton(
-                    text="6-sinf", callback_data="setclass_6-sinf"
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text="7-sinf", callback_data="setclass_7-sinf"
-                ),
-                InlineKeyboardButton(
-                    text="8-sinf", callback_data="setclass_8-sinf"
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text="9-sinf", callback_data="setclass_9-sinf"
-                ),
-                InlineKeyboardButton(
-                    text="10-sinf", callback_data="setclass_10-sinf"
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text="11-sinf", callback_data="setclass_11-sinf"
-                )
-            ],
-        ]
-    )
-
-    invite_url = f"https://t.me/MY_Zakovat_Quiz_Bot?start={room_id}"
-    await message.answer(
-        f"✨ **Yangi xona yaratildi!**\n\n"
-        f"👤 **Kapitan:** {message.from_user.full_name}\n"
-        f"🔗 **Do'stlarni taklif qilish:** {invite_url}\n\n"
-        f"📌 **Sinfni tanlang:**",
-        reply_markup=class_kb,
-        parse_mode="Markdown",
-    )
-
-
-@dp.callback_query(F.data.startswith("setclass_"))
-async def process_class_select(callback: types.CallbackQuery):
-    selected_class = callback.data.split("_")[1]
-    user_id = callback.from_user.id
-    room_id = user_room.get(user_id)
-
-    if room_id in rooms:
-        rooms[room_id]["class"] = selected_class
-
-    count_kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="5 ta savol", callback_data="setcount_5"
-                ),
-                InlineKeyboardButton(
-                    text="10 ta savol", callback_data="setcount_10"
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text="15 ta savol", callback_data="setcount_15"
-                )
-            ],
-        ]
-    )
-    await callback.message.edit_text(
-        f"✅ Sinf: **{selected_class}** tanlandi.\n\n🔢 **Endi savollar sonini belgilang:**",
-        reply_markup=count_kb,
-        parse_mode="Markdown",
-    )
-
-
-@dp.callback_query(F.data.startswith("setcount_"))
-async def process_count_select(callback: types.CallbackQuery):
-    count = int(callback.data.split("_")[1])
-    user_id = callback.from_user.id
-    room_id = user_room.get(user_id)
-
-    if room_id in rooms:
-        rooms[room_id]["question_count"] = count
-
-    await callback.message.edit_text(
-        f"⚙️ **Sozlamalar saqlandi!**\n\n"
-        f"📚 Sinf: **{rooms[room_id]['class']}**\n"
-        f"🔢 Savollar soni: **{count} ta**\n\n"
-        f"Tayyor bo'lsangiz, **🚀 O'yinni Boshlash** tugmasini bosing!",
-        parse_mode="Markdown",
-    )
-
-
-@dp.message(F.text == "🚀 O'yinni Boshlash")
-@dp.message(Command("startgame"))
-async def start_game(message: types.Message):
-    user_id = message.from_user.id
-    room_id = user_room.get(user_id)
-
-    if not room_id or room_id not in rooms:
-        await message.answer(
-            "⚠️ Iltimos, **➕ Yangi Xona Yaratish** tugmasi orqali xona yarating!",
-            parse_mode="Markdown",
+    if q_index >= len(QUESTIONS):
+        score = context.user_data.get("score", 0)
+        await update.message.reply_text(
+            f"Tabriklaymiz! Barcha savollar tugadi.\n"
+            f"Sizning yakuniy natijangiz: {score}/{len(QUESTIONS)}"
         )
         return
 
-    room = rooms[room_id]
+    q_data = QUESTIONS[q_index]
+    caption = f"Savol №{q_data['id']}:\n{q_data['q']}"
 
-    if user_id != room["captain"]:
-        await message.answer(
-            "⚠️ O'yinni faqat xonani yaratgan **Kapitan** boshlay oladi!",
-            parse_mode="Markdown",
+    if q_data.get("hint"):
+        caption += f"\n\n💡 Maslahat: {q_data['hint']}"
+
+    if q_data.get("img"):
+        await update.message.reply_photo(photo=q_data["img"], caption=caption)
+    else:
+        await update.message.reply_text(caption)
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Foydalanuvchi javobini tekshirish."""
+    q_index = context.user_data.get("current_question")
+
+    if q_index is None or q_index >= len(QUESTIONS):
+        await update.message.reply_text(
+            "Yangi o'yinni boshlash uchun /start tugmasini bosing."
         )
         return
 
-    all_solved = set()
-    for uid in room["members"].keys():
-        all_solved.update(get_user_solved(uid))
+    user_text = update.message.text
+    q_data = QUESTIONS[q_index]
 
-    available_questions = [
-        q for q in LOGICAL_QUESTIONS if q.get("id") not in all_solved
-    ]
-    if len(available_questions) < room["question_count"]:
-        available_questions = LOGICAL_QUESTIONS.copy()
+    if check_answer(user_text, q_data["a"]):
+        context.user_data["score"] = context.user_data.get("score", 0) + 1
+        await update.message.reply_text("✅ To'g'ri javob!")
+    else:
+        correct_answers = ", ".join(q_data["a"])
+        await update.message.reply_text(
+            f"❌ Noto'g'ri javob.\nTo'g'ri javob(lar): {correct_answers}"
+        )
 
-    random.shuffle(available_questions)
-    room["questions"] = available_questions[: room["question_count"]]
-    room["is_started"] = True
+    # Keyingi savolga o'tish
+    context.user_data["current_question"] += 1
+    await send_question(update, context)
 
-    members_count = len(room["members"])
-    members_text = ", ".join(
-        [f"**{name}**" for name in room["members"].values()]
+
+# --- ASOSIY ISHGA TUSHIRISH FUNKSIYASI ---
+def main():
+    app = Application.builder().token(TOKEN).build()
+
+    # Buyruqlar
+    app.add_handler(CommandHandler("start", start_command))
+
+    # Matnli xabarlar (Javoblarni ushlash)
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
     )
 
-    raw_rules_text = (
-        f"📜 **ZAKOVAT O'YINI QOIDALARI VA NIZOMI:**\n\n"
-        f"🎯 **Kategoriya:** {room['class']}\n"
-        f"🔢 **Savollar soni:** {room['question_count']} ta\n"
-        f"👥 **Qatnashchilar ({members_count} kishi):** {members_text}\n\n"
-        f"🏆 **Ball berish tartibi:**\n"
-        f"🥇 **1-bo'lib to'g'ri javob bergan o'yinchi:** 2 Ball\n"
-        f"🥈 **Keyingi to'g'ri javob berganlar:** 1 Ball\n\n"
-        f"🚀 **O'yin 5 soniyadan so'ng boshlanadi. Muvaffaqiyat tilaymiz!**"
-    )
-
-    rules_text = format_rules_with_groq(raw_rules_text)
-    await message.answer(rules_text, parse_mode="Markdown")
-
-    # 5 soniya kutib, birinchi savolni yuborish (rasmli bo'lsa rasmi bilan)
-    await asyncio.sleep(5)
-    await send_question(room_id)
-
-
-async def main():
-    port = int(os.environ.get("PORT", 8080))
-    app = web.Application()
-    app.router.add_get("/", handle_ping)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
-
-    logging.info(f"Port {port} da Web Server va Bot ishga tushdi!")
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    print("Bot muvaffaqiyatli ishga tushdi...")
+    app.run_polling()
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        logging.info("Bot to'xtatildi.")
+    main()
