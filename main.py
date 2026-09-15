@@ -10,7 +10,7 @@ from groq import Groq
 logging.basicConfig(level=logging.INFO)
 
 # 2. API Kalitlar va Muhit o'zgaruvchilari (Environment Variables)
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAFAZIWW0kRKnj7cXL3mSkzkwVww5cB_V-E")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAGdY98HQeT9mksQW73XO0pS7fsYYbF5GP0")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 
 # 3. Bot va Groq ob'ektlarini yaratish
