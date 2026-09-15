@@ -1,249 +1,222 @@
 import os
-import re
-import random
-import logging
-from threading import Thread
+import asyncio
+from dotenv import load_dotenv
 from flask import Flask
+from threading import Thread
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
-    MessageHandler,
     CallbackQueryHandler,
-    ContextTypes,
+    MessageHandler,
     filters,
+    ContextTypes
 )
 
-# Logging sozlamalari
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
+# questions.py faylidan savollar va check_answer funksiyasini import qilamiz
+from questions import LOGICAL_QUESTIONS, check_answer
 
-TOKEN = os.getenv("BOT_TOKEN", "8851685095:AAGmqCD8e-fdVh-XOaEXpPEr_ZHXvuvC6bw")
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 
-# --- RENDER UCHUN FLASK SERVER (Health Check) ---
-app_web = Flask("")
+# Web Server (Render 24/7 ishlashi uchun)
+app = Flask('')
 
-@app_web.route("/")
+@app.route('/')
 def home():
-    return "Zakovat Boti Faol Ishlamoqda!"
+    return "Bot faol ishlamoqda!"
 
-def run_web():
-    port = int(os.environ.get("PORT", 10000))
-    app_web.run(host="0.0.0.0", port=port)
+def run_flask():
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 
 def keep_alive():
-    t = Thread(target=run_web)
+    t = Thread(target=run_flask)
+    t.daemon = True
     t.start()
 
+# --- HELPER FUNKSIYALAR ---
 
-# --- SAVOLLAR BAZASI (Sinflar va Mos Rasmlar Bilan) ---
-QUESTIONS = [
-    {
-        "id": 1,
-        "grade": 5,
-        "q": "Suratdagi elektron qurilmalarning 'miya'si hisoblangan obyekt nima?",
-        "img": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
-        "hint": "Mikrosxema yoki chip",
-        "a": ["mikrosxema", "chip", "protsessor"],
-    },
-    {
-        "id": 2,
-        "grade": 5,
-        "q": "Dengizda suzib yurgan bu ulkan muz bo'lagi nima deyiladi?",
-        "img": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
-        "hint": "Titanik kemasi ham shunga urilgan",
-        "a": ["aysberg", "muzlomi", "muz tog'i"],
-    },
-    {
-        "id": 3,
-        "grade": 6,
-        "q": "Ushbu qadimiy Amfiteatr (Kolizey) qaysi shaharda joylashgan?",
-        "img": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800",
-        "hint": "Italiya poytaxti",
-        "a": ["rim", "rome"],
-    },
-    {
-        "id": 4,
-        "grade": 6,
-        "q": "Suratda ko'rsatilgan 'O'rmon qiroli' deb ataluvchi jonli nima?",
-        "img": "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=800",
-        "hint": "Yirtqich sutemizuvchi",
-        "a": ["sher", "arslon", "lion"],
-    },
-    {
-        "id": 5,
-        "grade": 7,
-        "q": "Ushbu mashhur va mazali meva nomini yozing.",
-        "img": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "Nyu-Tonga yordam bergan meva",
-        "a": ["olma", "apple"],
-    },
-    # Qolgan barcha 107 ta savol shu tarbiatda grade (sinf) parametri bilan joylashadi...
-]
-
-
-# --- YORDAMCHI FUNKSIYALAR ---
-def normalize_text(text: str) -> str:
-    if not text:
-        return ""
-    text = text.lower().strip()
-    text = re.sub(r"[^\w\s]", "", text)
-    return text
-
-def check_answer(user_answer: str, correct_answers: list) -> bool:
-    norm_user = normalize_text(user_answer)
-    for ans in correct_answers:
-        if normalize_text(ans) in norm_user:
-            return True
-    return False
-
-
-# --- BOT MENYU VA HANDLERLARI ---
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """1-BOSQICH: Sinfni tanlash menyusi"""
+def get_count_keyboard():
     keyboard = [
-        [InlineKeyboardButton("5-Sinf", callback_data="grade_5"), InlineKeyboardButton("6-Sinf", callback_data="grade_6")],
-        [InlineKeyboardButton("7-Sinf", callback_data="grade_7"), InlineKeyboardButton("Barcha Sinflar 🌐", callback_data="grade_all")]
+        [InlineKeyboardButton("3 ta savol", callback_data="count_3"), InlineKeyboardButton("5 ta savol", callback_data="count_5")],
+        [InlineKeyboardButton("10 ta savol", callback_data="count_10"), InlineKeyboardButton("15 ta savol", callback_data="count_15")]
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    return InlineKeyboardMarkup(keyboard)
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
+    await update.message.reply_text(
+        "Xush kelibsiz! O'yinni boshlash uchun savollar sonini tanlang:",
+        reply_markup=get_count_keyboard()
+    )
+
+# --- TAYMER VAZIFASI ---
+
+async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
+    """Xabarni har soniyada tahrirlab vaqtni ko'rsatadi"""
+    try:
+        while total_seconds > 0:
+            await asyncio.sleep(1)
+            total_seconds -= 1
+            
+            # Agar foydalanuvchi javob berib bo'lgan bo'lsa taymerni to'xtatamiz
+            if not context.user_data.get("is_answering", False):
+                return
+            
+            mins, secs = divmod(total_seconds, 60)
+            time_str = f"{mins}:{secs:02d}"
+            
+            q_data = context.user_data.get("current_q")
+            q_index = context.user_data.get("q_index", 0)
+            total_q = context.user_data.get("total_q", 0)
+            
+            text = (
+                f"❓ <b>Savol {q_index + 1}/{total_q}:</b>\n"
+                f"{q_data['q']}\n\n"
+                f"⏱ <b>Qolgan vaqt:</b> {time_str}"
+            )
+            
+            try:
+                await context.bot.edit_message_caption(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    caption=text,
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass # Agar matn o'zgarmagan bo'lsa telegram xatolik berishini o'tkazib yuboramiz
+
+        # Vaqt tugasa
+        if context.user_data.get("is_answering", False):
+            context.user_data["is_answering"] = False
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="⏰ <b>Vaqt tugadi!</b> Javob qabul qilinmadi.",
+                parse_mode="HTML"
+            )
+            await ask_next_question(context, chat_id)
+            
+    except asyncio.CancelledError:
+        pass
+
+# --- SAVOLLARNI BERISH ---
+
+async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
+    q_index = context.user_data.get("q_index", 0)
+    selected_questions = context.user_data.get("questions", [])
     
-    msg = "🧠 **Zakovat Mantiqiy Savollar Botiga Xush Kelibsiz!**\n\nBoshlash uchun sinfni tanlang:"
-    if update.message:
-        await update.message.reply_text(msg, reply_markup=reply_markup, parse_mode="Markdown")
-    else:
-        await update.callback_query.message.reply_text(msg, reply_markup=reply_markup, parse_mode="Markdown")
-
-
-async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Tugmalar bosilganda ishlaydigan mantiq"""
-    query = update.callback_query
-    await query.answer()
-    data = query.data
-
-    # Sinf tanlanganda -> Savollar sonini so'rash
-    if data.startswith("grade_"):
-        selected_grade = data.split("_")[1]
-        context.user_data["selected_grade"] = selected_grade
-
-        keyboard = [
-            [InlineKeyboardButton("5 ta savol", callback_data="count_5"), InlineKeyboardButton("10 ta savol", callback_data="count_10")],
-            [InlineKeyboardButton("20 ta savol", callback_data="count_20"), InlineKeyboardButton("Barcha savollar 📚", callback_data="count_all")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        await query.edit_message_text(
-            text=f"📌 Tanlandi: **{selected_grade.upper()}** sinf.\n\nEndi testda nechta savol bo'lishini tanlang:",
-            reply_markup=reply_markup,
-            parse_mode="Markdown"
-        )
-
-    # Savollar soni tanlanganda -> O'yinni tayyorlash va boshlash
-    elif data.startswith("count_"):
-        count_str = data.split("_")[1]
-        grade = context.user_data.get("selected_grade", "all")
-
-        # Sinf bo'yicha saralash
-        if grade == "all":
-            filtered_q = QUESTIONS.copy()
-        else:
-            filtered_q = [q for q in QUESTIONS if q.get("grade") == int(grade)]
-
-        if not filtered_q:
-            filtered_q = QUESTIONS.copy() # Agar ushbu sinfda savol bo'lmasa, barchasini beradi
-
-        # Savollarni aralashtirish
-        random.shuffle(filtered_q)
-
-        # Cheklov qo'yish
-        if count_str != "all":
-            limit = int(count_str)
-            filtered_q = filtered_q[:limit]
-
-        context.user_data["questions"] = filtered_q
-        context.user_data["current_question"] = 0
-        context.user_data["score"] = 0
-
-        await query.edit_message_text(
-            text=f"🚀 **O'yin Boshlandi!**\nJami savollar soni: {len(filtered_q)} ta.\nOmad!",
-            parse_mode="Markdown"
-        )
-        await send_question(query.message, context)
-
-
-async def send_question(message, context: ContextTypes.DEFAULT_TYPE):
-    """Savolni yuborish"""
-    q_index = context.user_data.get("current_question", 0)
-    user_questions = context.user_data.get("questions", [])
-
-    if q_index >= len(user_questions):
+    # O'yin tugaganini tekshirish
+    if q_index >= len(selected_questions):
         score = context.user_data.get("score", 0)
+        total = len(selected_questions)
         
-        # O'yin tugagach qayta boshlash tugmasi
-        keyboard = [[InlineKeyboardButton("🔄 Yangi O'yin Boshlash", callback_data="restart")]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await message.reply_text(
-            f"🎉 **O'yin yakunlandi!**\n\nSizning natijangiz: **{score}/{len(user_questions)}**",
-            reply_markup=reply_markup,
-            parse_mode="Markdown"
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=(
+                f"🎉 <b>O'yin yakunlandi!</b>\n\n"
+                f"📊 <b>Natijangiz:</b> siz {total} ta savoldan <b>{score}</b> tasiga to'g'ri javob berdingiz!\n\n"
+                f"Qayta o'ynash uchun sonni tanlang:"
+            ),
+            parse_mode="HTML",
+            reply_markup=get_count_keyboard()
         )
         return
 
-    q_data = user_questions[q_index]
-    caption = f"❓ **Savol №{q_index + 1} / {len(user_questions)}**:\n\n{q_data['q']}"
+    q_data = selected_questions[q_index]
+    context.user_data["current_q"] = q_data
+    context.user_data["is_answering"] = True
+    
+    text = (
+        f"❓ <b>Savol {q_index + 1}/{len(selected_questions)}:</b>\n"
+        f"{q_data['q']}\n\n"
+        f"⏱ <b>Qolgan vaqt:</b> 1:50"
+    )
+    
+    # Rasm va savolni yuborish
+    msg = await context.bot.send_photo(
+        chat_id=chat_id,
+        photo=q_data["image"],
+        caption=text,
+        parse_mode="HTML"
+    )
+    
+    # Oldingi taymerni bekor qilish va yangisini ishga tushirish (110 soniya = 1 daqiqa 50 soniya)
+    if "timer_task" in context.user_data and context.user_data["timer_task"]:
+        context.user_data["timer_task"].cancel()
+        
+    task = asyncio.create_task(timer_task(context, chat_id, msg.message_id, 110))
+    context.user_data["timer_task"] = task
 
-    if q_data.get("hint"):
-        caption += f"\n\n💡 *Maslahat:* {q_data['hint']}"
+# --- CALLBACK QO'NG'IROQLARI (TUGMALAR) ---
 
-    if q_data.get("img"):
-        try:
-            await message.reply_photo(photo=q_data["img"], caption=caption, parse_mode="Markdown")
-        except Exception:
-            await message.reply_text(caption, parse_mode="Markdown")
-    else:
-        await message.reply_text(caption, parse_mode="Markdown")
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data.startswith("count_"):
+        count = int(query.data.split("_")[1])
+        
+        import random
+        # questions.py faylidagi savollardan tasodifiy tanlab olamiz
+        all_q = LOGICAL_QUESTIONS.copy()
+        random.shuffle(all_q)
+        
+        context.user_data["questions"] = all_q[:count]
+        context.user_data["q_index"] = 0
+        context.user_data["score"] = 0
+        context.user_data["total_q"] = count
+        
+        await query.message.delete()
+        await ask_next_question(context, query.message.chat_id)
 
+# --- JAVOBLARNI TEKSHIRISH ---
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Matnli javoblarni tekshirish"""
-    q_index = context.user_data.get("current_question")
-    user_questions = context.user_data.get("questions")
-
-    if q_index is None or not user_questions or q_index >= len(user_questions):
-        await update.message.reply_text("Yangi o'yinni boshlash uchun /start buyrug'ini bosing.")
+    # Agar foydalanuvchi hozir savolga javob berish bosqichida bo'lmasa
+    if not context.user_data.get("is_answering", False):
         return
 
     user_text = update.message.text
-    q_data = user_questions[q_index]
+    current_q = context.user_data.get("current_q")
+    
+    if not current_q:
+        return
+        
+    # Taymerni to'xtatamiz
+    context.user_data["is_answering"] = False
+    if "timer_task" in context.user_data and context.user_data["timer_task"]:
+        context.user_data["timer_task"].cancel()
 
-    if check_answer(user_text, q_data["a"]):
+    # questions.py faylidagi check_answer orqali tekshirish
+    is_correct = check_answer(user_text, current_q["a"])
+    
+    if is_correct:
         context.user_data["score"] = context.user_data.get("score", 0) + 1
-        await update.message.reply_text("✅ **To'g'ri javob!**", parse_mode="Markdown")
+        await update.message.reply_text("✅ <b>To'g'ri javob!</b>", parse_mode="HTML")
     else:
-        correct_answers = ", ".join(q_data["a"])
+        correct_one = current_q["a"][0]
         await update.message.reply_text(
-            f"❌ **Noto'g'ri javob.**\nTo'g'ri javob(lar): *{correct_answers}*",
-            parse_mode="Markdown"
+            f"❌ <b>Noto'g'ri javob.</b>\nTo'g'ri javob: <i>{correct_one}</i>", 
+            parse_mode="HTML"
         )
-
-    context.user_data["current_question"] += 1
-    await send_question(update.message, context)
-
+        
+    context.user_data["q_index"] += 1
+    await ask_next_question(context, update.message.chat_id)
 
 # --- MAIN ---
+
 def main():
     keep_alive()
+    
+    app_bot = Application.builder().token(TOKEN).build()
+    
+    app_bot.add_handler(CommandHandler("start", start_command))
+    app_bot.add_handler(CallbackQueryHandler(button_handler))
+    app_bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    print("Bot muvaffaqiyatli ishga tushdi!")
+    app_bot.run_polling()
 
-    app = Application.builder().token(TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start_command))
-    app.add_handler(CallbackQueryHandler(button_callback))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    print("Bot menyu bilan muvaffaqiyatli ishga tushdi...")
-    app.run_polling()
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
