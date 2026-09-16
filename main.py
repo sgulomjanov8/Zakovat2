@@ -19,7 +19,7 @@ from telegram.ext import (
 from questions import LOGICAL_QUESTIONS, check_answer
 
 load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
 
 # Web Server (Render'da 24/7 ishlashi uchun)
 app = Flask('')
