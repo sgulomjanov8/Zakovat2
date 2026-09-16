@@ -19,11 +19,9 @@ from telegram.ext import (
 from questions import LOGICAL_QUESTIONS, check_answer
 
 load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 
-# Telegram Bot Tokeni
-TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
-
-# Render 24/7 ishlashi uchun Flask Web Server
+# Web Server (Render'da 24/7 ishlashi uchun)
 app = Flask('')
 
 @app.route('/')
@@ -68,17 +66,30 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-# --- TAYMER VAZIFASI (1:50 SANAYDI) ---
+# --- TAYMER VA HINT (MASLAHAT) VAZIFASI ---
 
 async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
     try:
+        hint_sent = False
         while total_seconds > 0:
             await asyncio.sleep(1)
             total_seconds -= 1
             
-            # Foydalanuvchi javob bergan bo'lsa taymer to'xtaydi
+            # Foydalanuvchi javob berib bo'lgan bo'lsa, taymer to'xtaydi
             if not context.user_data.get("is_answering", False):
                 return
+
+            # 80-soniyaga kelganda (yoki o'tganda) 1 marta hint (maslahat) yuborish
+            # 110-30=80 (ya'ni 80-soniya o'tganida)
+            if total_seconds <= 30 and not hint_sent:
+                hint_sent = True
+                q_data = context.user_data.get("current_q")
+                if q_data and q_data.get("hint"):
+                    await context.bot.send_message(
+                        chat_id=chat_id,
+                        text=f"💡 <b>Maslahat:</b> {q_data['hint']}",
+                        parse_mode="HTML"
+                    )
             
             mins, secs = divmod(total_seconds, 60)
             time_str = f"{mins}:{secs:02d}"
@@ -103,7 +114,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             except Exception:
                 pass
 
-        # Vaqt tugasa
+        # Vaqt tugaganda
         if context.user_data.get("is_answering", False):
             context.user_data["is_answering"] = False
             await context.bot.send_message(
@@ -111,6 +122,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
                 text="⏰ <b>Vaqt tugadi!</b> Javob qabul qilinmadi.",
                 parse_mode="HTML"
             )
+            context.user_data["q_index"] += 1
             await ask_next_question(context, chat_id)
             
     except asyncio.CancelledError:
@@ -149,14 +161,22 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         f"⏱ <b>Qolgan vaqt:</b> 1:50"
     )
     
-    msg = await context.bot.send_photo(
-        chat_id=chat_id,
-        photo=q_data["image"],
-        caption=text,
-        parse_mode="HTML"
-    )
+    # Rasm mavjudligini tekshirish
+    if q_data.get("image"):
+        msg = await context.bot.send_photo(
+            chat_id=chat_id,
+            photo=q_data["image"],
+            caption=text,
+            parse_mode="HTML"
+        )
+    else:
+        msg = await context.bot.send_message(
+            chat_id=chat_id,
+            text=text,
+            parse_mode="HTML"
+        )
     
-    # Oldingi taymerni bekor qilib, yangi 110 soniyalik (1:50) taymerni yoqadi
+    # Eski taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqish
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
@@ -188,7 +208,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         all_q = LOGICAL_QUESTIONS.copy()
         
-        # Sinf bo'yicha saralash
+        # Sinf bo'yicha filterlash
         if selected_class != "all":
             filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
             if filtered_q:
@@ -220,14 +240,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
 
-    # questions.py faylidagi check_answer orqali tekshiradi
+    # questions.py faylidagi check_answer orqali tekshirish
     is_correct = check_answer(user_text, current_q["a"])
     
     if is_correct:
         context.user_data["score"] = context.user_data.get("score", 0) + 1
         await update.message.reply_text("✅ <b>To'g'ri javob!</b>", parse_mode="HTML")
     else:
-        correct_one = current_q["a"][0]
+        correct_one = current_q["a"][0] if isinstance(current_q["a"], list) else current_q["a"]
         await update.message.reply_text(
             f"❌ <b>Noto'g'ri javob.</b>\nTo'g'ri javob: <i>{correct_one}</i>", 
             parse_mode="HTML"
@@ -236,7 +256,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["q_index"] += 1
     await ask_next_question(context, update.message.chat_id)
 
-# --- ISHGA TUSHIRISH ---
+# --- ASOSIY ISHGA TUSHIRISH ---
 
 def main():
     keep_alive()
