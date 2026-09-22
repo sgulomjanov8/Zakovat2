@@ -15,20 +15,22 @@ from telegram.ext import (
     ContextTypes
 )
 
-# Импорт вопросов и функции проверки из вашего questions.py
-from questions import LOGICAL_QUESTIONS, check_answer
+# Импортируем базу вопросов
+try:
+    from questions import LOGICAL_QUESTIONS, check_answer
+except ImportError:
+    # Запасной вариант, если структура вопросов другая
+    from questions import questions as LOGICAL_QUESTIONS, check_answer
 
-# Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Новый токен прямо в коде
 TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
 
-# ----------------- FLASK WEB SERVER FOR RENDER -----------------
+# ----------------- FLASK SERVER -----------------
 app = Flask('')
 
 @app.route('/')
@@ -44,7 +46,7 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# ----------------- КЛАВИАТУРЫ И МЕНЮ -----------------
+# ----------------- КЛАВИАТУРЫ -----------------
 
 def get_class_keyboard():
     keyboard = [
@@ -62,7 +64,14 @@ def get_count_keyboard():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# ----------------- ОБРАБОТКА /START -----------------
+def get_start_game_keyboard():
+    """Кнопка для подтверждения начала игры"""
+    keyboard = [
+        [InlineKeyboardButton("🚀 O'yinni boshlash", callback_data="start_game")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+# ----------------- /START -----------------
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
@@ -76,7 +85,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-# ----------------- ТАЙМЕР И ПОДСКАЗКА (HINT) -----------------
+# ----------------- ТАЙМЕР И ПОДСКАЗКА -----------------
 
 async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
     try:
@@ -99,7 +108,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
                             parse_mode="HTML"
                         )
                     except Exception as e:
-                        logger.error(f"Ошибка при отправке подсказки: {e}")
+                        logger.error(f"Error hint: {e}")
             
             mins, secs = divmod(total_seconds, 60)
             time_str = f"{mins}:{secs:02d}"
@@ -145,7 +154,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
     except asyncio.CancelledError:
         pass
 
-# ----------------- ОТПРАВКА СЛЕДУЮЩЕГО ВОПРОСА -----------------
+# ----------------- СЛЕДУЮЩИЙ ВОПРОС -----------------
 
 async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     q_index = context.user_data.get("q_index", 0)
@@ -192,7 +201,7 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
                 parse_mode="HTML"
             )
     except Exception as e:
-        logger.error(f"Ошибка отправки сообщения: {e}")
+        logger.error(f"Error send: {e}")
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
@@ -205,32 +214,38 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     task = asyncio.create_task(timer_task(context, chat_id, msg.message_id, 110))
     context.user_data["timer_task"] = task
 
-# ----------------- ОБРАБОТКА НАЖАТИЙ НА КНОПКИ -----------------
+# ----------------- КНОПКИ (CALLBACK) -----------------
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
     try:
+        # Step 1: Выбор класса
         if query.data.startswith("class_"):
             selected_class = query.data.split("_")[1]
             context.user_data["selected_class"] = selected_class
             
             class_title = f"{selected_class}-sinf" if selected_class != "all" else "Barcha sinflar"
-            await query.message.edit_text(
+            await query.edit_message_text(
                 f"✅ **{class_title}** tanlandi!\nEndi **savollar sonini** tanlang:",
                 reply_markup=get_count_keyboard(),
                 parse_mode="Markdown"
             )
             
+        # Step 2: Выбор количества вопросов
         elif query.data.startswith("count_"):
             count = int(query.data.split("_")[1])
             selected_class = context.user_data.get("selected_class", "all")
             
-            all_q = LOGICAL_QUESTIONS.copy()
+            all_q = list(LOGICAL_QUESTIONS)
             
+            # Безопасная фильтрация с проверкой типов
             if selected_class != "all":
-                filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
+                filtered_q = [
+                    q for q in all_q 
+                    if str(q.get("class", q.get("sinf", ""))) == str(selected_class)
+                ]
                 if filtered_q:
                     all_q = filtered_q
 
@@ -241,11 +256,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["score"] = 0
             context.user_data["total_q"] = min(count, len(all_q))
             
-            await query.message.delete()
+            await query.edit_message_text(
+                f"🎯 **Tayyorsizmi?**\n\nSinf: **{selected_class}**\nSavollar soni: **{len(context.user_data['questions'])} ta**\n\nO'yinni boshlash uchun quyidagi tugmani bosing:",
+                reply_markup=get_start_game_keyboard(),
+                parse_mode="Markdown"
+            )
+
+        # Step 3: Нажатие кнопки "O'yinni boshlash"
+        elif query.data == "start_game":
+            await query.delete_message()
             await ask_next_question(context, query.message.chat_id)
 
     except Exception as e:
-        logger.error(f"Ошибка в button_handler: {e}")
+        logger.error(f"Error button_handler: {e}", exc_info=True)
 
 # ----------------- ПРОВЕРКА ОТВЕТА -----------------
 
@@ -264,13 +287,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
 
-    is_correct = check_answer(user_text, current_q["a"])
+    is_correct = check_answer(user_text, current_q.get("a", current_q.get("answer", "")))
     
     if is_correct:
         context.user_data["score"] = context.user_data.get("score", 0) + 1
         await update.message.reply_text("✅ <b>To'g'ri javob!</b>", parse_mode="HTML")
     else:
-        correct_one = current_q["a"][0] if isinstance(current_q["a"], list) else current_q["a"]
+        ans = current_q.get("a", current_q.get("answer", ""))
+        correct_one = ans[0] if isinstance(ans, list) else ans
         await update.message.reply_text(
             f"❌ <b>Noto'g'ri javob.</b>\nTo'g'ri javob: <i>{correct_one}</i>", 
             parse_mode="HTML"
@@ -290,8 +314,7 @@ def main():
     app_bot.add_handler(CallbackQueryHandler(button_handler))
     app_bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    logger.info("Bot uspeshno zapushen!")
-    
+    logger.info("Bot started!")
     app_bot.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
