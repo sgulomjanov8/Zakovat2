@@ -3,755 +3,2107 @@ import re
 from difflib import SequenceMatcher
 
 LOGICAL_QUESTIONS = [
-    {
-        "id": 1,
-        "q": "1. Bir kishi yomg'irda soyabonsiz va kalta shlyapasiz yurgan bo'lsa ham, birorta sochi ho'l bo'lmadi. Bu qanday bo'lishi mumkin?",
-        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
-        "hint": "💡 Maslahat: Insonning boshida sochi bo'lmasligi ham mumkin.",
-        "a": ["kal", "u kal", "sochi yo'q", "sochi yoq", "kal edi", "sochi yo'qligi uchun"]
-    },
-    {
-        "id": 2,
-        "q": "2. Qaysi oyda odamlar eng kam uxlashadi?",
-        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
-        "hint": "💡 Maslahat: Bu oyda kunlar soni boshqalariga qaraganda kamroq.",
-        "a": ["fevral", "fevral oyida", "fevralda"]
-    },
-    {
-        "id": 3,
-        "q": "3. Tunda qorong'i xonada qora mushuk o'tiribdi. Qora ko'zoynak taqqan haydovchi uni qanday qilib darrov ko'rib qoldi?",
-        "image": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800",
-        "hint": "💡 Maslahat: Xona qorong'i bo'lsa ham, ko'chada vaqt boshqacha bo'lishi mumkin.",
-        "a": ["kunduzi", "kun duzi", "kun edi", "kunduzi edi", "kunduz kuni", "kun vakti"]
-    },
-    {
-        "id": 4,
-        "q": "4. Uni qanchalik ko'p olsangiz, uning hajmi shunchalik kattalashib boraveradi. U nima?",
-        "image": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800",
-        "hint": "💡 Maslahat: Yer ostidagi yoki devordagi bo'shliq.",
-        "a": ["chuqur", "chuqurcha", "o'ra", "ora", "chuqurini"]
-    },
-    {
-        "id": 5,
-        "q": "5. Siz uni ushlay olmaysiz, lekin u doim siz bilan birga yuradi va faqat qorong'ida yo'qoladi. U nima?",
-        "image": "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800",
-        "hint": "💡 Maslahat: Yorug'lik tushganda yerda hosil bo'ladi.",
-        "a": ["soya", "soyasi", "o'z soyasi", "soyamiz"]
-    },
-    {
-        "id": 6,
-        "q": "6. Suv ostida qaysi ko'zoynak bilan ham biror narsa ko'rib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-        "hint": "💡 Maslahat: Suv ostida hamma joy qorong'i yoki ko'z yumuq bo'lishi mumkin.",
-        "a": ["qorong'ida", "qorongida", "ko'z yumilganda", "yumuq ko'z", "ko'z yumik bo'lsa", "yumilgan koz"]
-    },
-    {
-        "id": 7,
-        "q": "7. Qaysi idishdan biror narsa yeb bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800",
-        "hint": "💡 Maslahat: Bu idish bo'sh yoki teshik bo'lishi mumkin.",
-        "a": ["bo'sh idish", "bosh idish", "bo'sh", "bosh", "teshik idish"]
-    },
-    {
-        "id": 8,
-        "q": "8. Stol ustida 3 ta olma bor edi. Siz 2 tasini oldingiz. Sizda nechta olma bor?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Maslahat: Siz olgan olmalarni hisoblang.",
-        "a": ["2 ta", "2", "ikkita", "2ta"]
-    },
-    {
-        "id": 9,
-        "q": "9. Bir xonada 5 ta sham yonib turibdi. 2 tasi o'chirildi. Xonada nechta sham qoldi?",
-        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
-        "hint": "💡 Maslahat: O'chirilgan shamlar ham xonada qoladi.",
-        "a": ["5 ta", "5", "beshta", "5ta"]
-    },
-    {
-        "id": 10,
-        "q": "10. Daraxtda 10 ta qush o'tirgan edi. Ovchi bittasini otdi. Daraxtda nechta qush qoldi?",
-        "image": "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=800",
-        "hint": "💡 Maslahat: O'q ovozidan keyin qolgan qushlar nima qiladi?",
-        "a": ["0 ta", "0", "hech biri", "bironta ham", "qolmaydi", "hech qancha", "0ta"]
-    },
-    {
-        "id": 11,
-        "q": "11. Elektr poyezdi shimolga qarab ketmoqda. Uning tutuni qaysi tomonga ketadi?",
-        "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
-        "hint": "💡 Maslahat: Elektr poyezdiga e'tibor bering.",
-        "a": ["tutuni yo'q", "tutun chiqmaydi", "hech qaysi tomonga", "tutuni yoq", "elektr poyezdida tutun bo'lmaydi"]
-    },
-    {
-        "id": 12,
-        "q": "12. Siz poygada ikkinchi o'rindagi odamni quvib o'tdingiz. Endi nechanchi o'rindasiz?",
-        "image": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800",
-        "hint": "💡 Maslahat: Siz kimning o'rnini egalladingiz?",
-        "a": ["2", "ikkinchi", "2-o'rin", "ikkinchi o'rin", "2 o'rin", "2-orin"]
-    },
-    {
-        "id": 13,
-        "q": "13. Poygada oxirgi odamni quvib o'tdingiz. Endi nechanchi o'rindasiz?",
-        "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800",
-        "hint": "💡 Maslahat: Oxirgi odamni quvib o'tish mumkinmi?",
-        "a": ["mumkin emas", "bo'lmaydi", "imkonsiz", "oxirgisini quvib bo'lmaydi", "bolmaydi"]
-    },
-    {
-        "id": 14,
-        "q": "14. Bir odam 10 qavatli binodan sakradi, ammo hech qanday jarohat olmadi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
-        "hint": "💡 Maslahat: U qayerdan sakraganiga e'tibor bering.",
-        "a": ["birinchi qavatdan", "1-qavatdan", "pastdan", "1 qavatdan", "paski qavatdan"]
-    },
-    {
-        "id": 15,
-        "q": "15. Qaysi narsa qurigani sari ho'l bo'lib boradi?",
-        "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800",
-        "hint": "💡 Maslahat: U bilan suvni artamiz.",
-        "a": ["sochiq", "sochiqni", "lappa"]
-    },
-    {
-        "id": 16,
-        "q": "16. Qaysi narsa qancha ko'p ishlatilsa, shuncha qisqaradi?",
-        "image": "https://images.unsplash.com/photo-1603899122634-f086ca5f5ddd?w=800",
-        "hint": "💡 Maslahat: U yorug'lik beradi.",
-        "a": ["sham", "shamni", "sovun", "qalam"]
-    },
-    {
-        "id": 17,
-        "q": "17. Qaysi narsa og'zi bor, lekin gapirmaydi?",
-        "image": "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?w=800",
-        "hint": "💡 Maslahat: U suv bilan bog'liq.",
-        "a": ["daryo", "daryoning og'zi", "qop", "ko'za"]
-    },
-    {
-        "id": 18,
-        "q": "18. Qaysi narsa oyog'i bor, lekin yura olmaydi?",
-        "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
-        "hint": "💡 Maslahat: Uyda undan ko'p uchraydi.",
-        "a": ["stol", "stul", "mebel", "karavot", "krovat"]
-    },
-    {
-        "id": 19,
-        "q": "19. Qaysi narsa qo'li bor, lekin hech narsani ushlay olmaydi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Maslahat: U vaqtni ko'rsatadi.",
-        "a": ["soat", "soatning qo'li", "soat strelkasi", "strelka"]
-    },
-    {
-        "id": 20,
-        "q": "20. Qaysi narsa ko'zi bor, lekin ko'ra olmaydi?",
-        "image": "https://images.unsplash.com/photo-1512758017271-d7b84c2113f1?w=800",
-        "hint": "💡 Maslahat: Tikishda undan foydalaniladi.",
-        "a": ["igna", "ignaning ko'zi", "igna ko'zi"]
-    },
-    {
-        "id": 21,
-        "q": "21. Qaysi narsa tishi bor, lekin tishlay olmaydi?",
-        "image": "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800",
-        "hint": "💡 Maslahat: Soch bilan ishlatiladi.",
-        "a": ["taroq", "soch taroq", "taroqning tishi", "arra"]
-    },
-    {
-        "id": 22,
-        "q": "22. Qaysi narsa qanotsiz uchadi?",
-        "image": "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800",
-        "hint": "💡 Maslahat: Uni osmonda ko'rish mumkin.",
-        "a": ["bulut", "bulutlar", "vaqt", "shamol"]
-    },
-    {
-        "id": 23,
-        "q": "23. Qaysi narsa qancha ko'paysa, shuncha kam ko'rasiz?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 Maslahat: Yorug'likning teskarisini o'ylang.",
-        "a": ["qorong'ulik", "qorong'i", "zulmat", "qorong'ulik ko'payganda", "tuman"]
-    },
-    {
-        "id": 24,
-        "q": "24. Qaysi narsa sizniki, lekin uni boshqalar sizdan ko'proq ishlatadi?",
-        "image": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800",
-        "hint": "💡 Maslahat: Odamlar sizga murojaat qilganda aytadi.",
-        "a": ["ism", "ismingiz", "mening ismim", "otim"]
-    },
-    {
-        "id": 25,
-        "q": "25. Qaysi savolga hech qachon 'ha' deb javob bera olmaysiz?",
-        "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
-        "hint": "💡 Maslahat: Oddiy holat haqida o'ylang.",
-        "a": ["uxlayapsanmi", "uxlayapsizmi", "uxlayotganmisan", "o'ldingmi", "uxlayapsanmi?"]
-    },
-    {
-        "id": 26,
-        "q": "26. Ertalab 4 oyoqda, tushda 2 oyoqda, kechqurun 3 oyoqda yuradigan narsa nima?",
-        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
-        "hint": "💡 Maslahat: Bu mashhur qadimiy topishmoq.",
-        "a": ["inson", "odam", "odamzod"]
-    },
-    {
-        "id": 27,
-        "q": "27. Bir kilogramm temir og'irmi yoki bir kilogramm paxta?",
-        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
-        "hint": "💡 Maslahat: Ikkalasining massasini solishtiring.",
-        "a": ["teng", "bir xil", "ikkalasi teng", "teng keladi"]
-    },
-    {
-        "id": 28,
-        "q": "28. Xonada 4 burchak bor. Har burchakda bittadan mushuk o'tiribdi. Har mushuk qarshisida 3 ta mushukni ko'rmoqda. Jami nechta mushuk bor?",
-        "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800",
-        "hint": "💡 Maslahat: Har burchakda bittadan mushuk bor.",
-        "a": ["4 ta", "4", "to'rtta", "4ta"]
-    },
-    {
-        "id": 29,
-        "q": "29. 2 ta ota va 2 ta o'g'il baliq oviga bordi. Ular jami 3 ta baliq tutishdi va har biriga bittadan tegdi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1516707352573-1b1e2e8e1d4a?w=800",
-        "hint": "💡 Maslahat: Ular uch kishi bo'lishi mumkin.",
-        "a": ["bobo ota o'g'il", "bobo, ota va o'g'il", "3 kishi", "bobo ota o'g'il edi"]
-    },
-    {
-        "id": 30,
-        "q": "30. Bir odam dushanba kuni shaharga keldi. U uch kun turib, dushanba kuni qaytib ketdi. Bu qanday mumkin?",
-        "image": "https://images.unsplash.com/photo-1494526585095-c41746248156?w=800",
-        "hint": "💡 Maslahat: 'Dushanba' faqat hafta kuni emas.",
-        "a": ["otining nomi dushanba", "otining nomi", "oti dushanba", "otining ismi dushanba"]
-    },
-    {
-        "id": 31,
-        "q": "31. 5 ta aka-uka bir xonada. Har birining o'z mashg'uloti bor: biri kitob o'qiydi, biri rasm chizadi, biri shaxmat o'ynaydi, biri ovqat pishiradi. Beshinchisi nima qiladi?",
-        "image": "https://images.unsplash.com/photo-1529068755536-a5ade0dcb4e8?w=800",
-        "hint": "💡 Maslahat: Shaxmatni odam yolg'iz o'ynamaydi.",
-        "a": ["shaxmat o'ynaydi", "shaxmat", "ukasi bilan shaxmat o'ynaydi", "shaxmat oynaydi"]
-    },
-    {
-        "id": 32,
-        "q": "32. Bir oilada 6 ta qiz bor. Har bir qizning bittadan akasi bor. Oilada nechta farzand bor?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Maslahat: Barcha qizlarning akasi bitta odam bo'lishi mumkin.",
-        "a": ["7 ta", "7", "yetti", "7ta"]
-    },
-    {
-        "id": 33,
-        "q": "33. Sizda 10 ta qo'y bor edi. Barchasidan tashqari 3 tasi qochib ketdi. Nechta qo'y qoldi?",
-        "image": "https://images.unsplash.com/photo-1484557985045-edf25e08da73?w=800",
-        "hint": "💡 Maslahat: 'Barchasidan tashqari 3 tasi' nimani anglatadi?",
-        "a": ["3 ta", "3", "uchta", "3ta"]
-    },
-    {
-        "id": 34,
-        "q": "34. 10 ta baliqdan 2 tasi cho'kib ketdi. Akvariumda nechta baliq qoldi?",
-        "image": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?w=800",
-        "hint": "💡 Maslahat: Baliqlar suvda yashaydi.",
-        "a": ["10 ta", "10", "o'nta", "10ta", "baliq chokmaydi"]
-    },
-    {
-        "id": 35,
-        "q": "35. Bir qo'lingizda 5 ta olma, ikkinchi qo'lingizda 5 ta olma bor. Sizda nima bor?",
-        "image": "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?w=800",
-        "hint": "💡 Maslahat: Savol olmalardan ko'ra boshqa narsani so'rayapti.",
-        "a": ["katta qo'llar", "ikkita qo'l", "qo'llar", "katta qol"]
-    },
-    {
-        "id": 36,
-        "q": "36. Qaysi xona eshigi yoki derazasi bo'lmasa ham xona hisoblanadi?",
-        "image": "https://images.unsplash.com/photo-1511497584788-876760111969?w=800",
-        "hint": "💡 Maslahat: Tabiatda ham 'xona'ga o'xshash joy bor.",
-        "a": ["qo'ziqorin", "qo'ziqorin xonasi", "qozasiz xona"]
-    },
-    {
-        "id": 37,
-        "q": "37. Qaysi daraxtning bargi yo'q, lekin u daraxt deb ataladi?",
-        "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
-        "hint": "💡 Maslahat: Kitob bilan bog'liq bo'lishi mumkin.",
-        "a": ["nasab daraxti", "genealogik daraxt", "daraxt rasmi", "shajara"]
-    },
-    {
-        "id": 38,
-        "q": "38. Qaysi kalit hech qanday qulfni ochmaydi?",
-        "image": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-        "hint": "💡 Maslahat: U musiqa bilan bog'liq.",
-        "a": ["musiqa kaliti", "skripka kaliti", "sol kaliti", "buloq"]
-    },
-    {
-        "id": 39,
-        "q": "39. Qaysi stol ustida ovqat yeyib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800",
-        "hint": "💡 Maslahat: Bu stol o'yin bilan bog'liq.",
-        "a": ["kompyuter stoli", "ping pong stoli", "o'yin stoli", "shaxmat stoli"]
-    },
-    {
-        "id": 40,
-        "q": "40. Qaysi ko'z bilan hech narsani ko'rib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?w=800",
-        "hint": "💡 Maslahat: U ignada ham bo'ladi.",
-        "a": ["igna ko'zi", "ignaning ko'zi", "ko'z teshigi", "buloq ko'zi"]
-    },
-    {
-        "id": 41,
-        "q": "41. Qaysi til bilan gapirib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800",
-        "hint": "💡 Maslahat: Poyabzal bilan bog'liq.",
-        "a": ["poyabzal tili", "etik tili", "poyabzalning tili", "oyoq kiyim tili"]
-    },
-    {
-        "id": 42,
-        "q": "42. Qaysi quloq eshitmaydi?",
-        "image": "https://images.unsplash.com/photo-1587778082149-bd5b1e4a7a4e?w=800",
-        "hint": "💡 Maslahat: U idishda bo'lishi mumkin.",
-        "a": ["qozon qulog'i", "qozonning qulog'i", "idish qulog'i", "qozon qulogi"]
-    },
-    {
-        "id": 43,
-        "q": "43. Qaysi boshda miya bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
-        "hint": "💡 Maslahat: Bu bosh kiyim bilan bog'liq.",
-        "a": ["mix boshi", "mixning boshi", "mix", "piyoz boshi", "sarimsoq boshi"]
-    },
-    {
-        "id": 44,
-        "q": "44. Bir uyda 4 ta xona bor. Har xonada bittadan chiroq, tashqarida esa 4 ta kalit bor. Qaysi kalit qaysi chiroqqa tegishli ekanini qanday aniqlash mumkin?",
-        "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800",
-        "hint": "💡 Maslahat: Chiroqning issiqligidan ham foydalanish mumkin.",
-        "a": ["birini yoqib kutish", "chiroqni yoqib issiqligini tekshirish", "issiqlik bilan", "yoqib kutish"]
-    },
-    {
-        "id": 45,
-        "q": "45. Uchta lampochka bor. Siz xonaga faqat bir marta kirishingiz mumkin. Tashqaridagi uchta kalitdan qaysi biri qaysi lampochkaniki ekanini qanday topasiz?",
-        "image": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800",
-        "hint": "💡 Maslahat: Bir lampochkani yoqing, keyin o'chiring va issiqligini tekshiring.",
-        "a": ["bittasini yoqib, bittasini yoqib-o'chirib, issiqligini tekshirish", "issiqlik orqali", "issiqlik bilan"]
-    },
-    {
-        "id": 46,
-        "q": "46. Sizda 2 ta arqon bor. Har biri aynan 1 soatda yonib tugaydi, ammo notekis yonadi. 45 daqiqani qanday o'lchaysiz?",
-        "image": "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=800",
-        "hint": "💡 Maslahat: Arqonning ikki uchini bir vaqtda yoqishdan foydalaning.",
-        "a": ["birinchi arqonning ikki uchini, ikkinchisining bir uchini yoqish", "ikki uchidan yoqish", "har ikkala uchini yoqish"]
-    },
-    {
-        "id": 47,
-        "q": "47. Bir odam yomg'irda ko'chada yurdi, lekin oyoqlari ham, kiyimlari ham ho'l bo'lmadi. U qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=800",
-        "hint": "💡 Maslahat: Yomg'ir qayerda yog'ayotganiga qarang.",
-        "a": ["yomg'ir yog'mayotgan joyda", "yomg'ir to'xtagan edi", "yopiq joyda", "soyabon bilan", "ustida yopinchiq bor edi"]
-    },
-    {
-        "id": 48,
-        "q": "48. Bir odam har kuni lift bilan 10-qavatga chiqadi, lekin pastga tushishda faqat 5-qavatgacha lift bilan tushib, qolganini piyoda yuradi. Nega?",
-        "image": "https://images.unsplash.com/photo-1544724569-5f546fd6f2b0?w=800",
-        "hint": "💡 Maslahat: Odamning bo'yi haqida o'ylang.",
-        "a": ["bo'yi kalta", "liftning tugmasiga yetmaydi", "5-qavatdan yuqoridagi tugmaga qo'li yetmaydi", "boyi kalta", "bo'yi yetmaydi"]
-    },
-    {
-        "id": 49,
-        "q": "49. Bir odam yakshanba kuni otiga minib yo'lga chiqdi. Uch kun o'tib yakshanba kuni qaytdi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1551884831-bbf3cdc6469e?w=800",
-        "hint": "💡 Maslahat: Otining nomi haqida o'ylang.",
-        "a": ["otining nomi yakshanba", "oti yakshanba", "otining ismi yakshanba"]
-    },
-    {
-        "id": 50,
-        "q": "50. Bir xona ichida 10 kishi bor. Har biri boshqa odam bilan qo'l berib ko'rishdi. Jami nechta qo'l siqish bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800",
-        "hint": "💡 Maslahat: Har bir juftlik faqat bir marta qo'l berishadi.",
-        "a": ["45", "45 ta", "45ta"]
-    },
-    {
-        "id": 51,
-        "q": "51. 5 ta odam bir-biri bilan qo'l berishdi. Har bir juftlik bir marta qo'l bergan bo'lsa, jami nechta qo'l siqish bo'ldi?",
-        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
-        "hint": "💡 Maslahat: Juftliklarni sanang.",
-        "a": ["10", "10 ta", "10ta"]
-    },
-    {
-        "id": 52,
-        "q": "52. Bir sonni 2 ga ko'paytirib, 2 qo'shib, 2 ga bo'lsangiz 6 chiqadi. Bu son nechchi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Maslahat: Amallarni teskari tartibda bajaring.",
-        "a": ["5", "besh"]
-    },
-    {
-        "id": 53,
-        "q": "53. 3 ta mushuk 3 daqiqada 3 ta sichqon tutsa, 100 ta mushuk 100 ta sichqonni necha daqiqada tutadi?",
-        "image": "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=800",
-        "hint": "💡 Maslahat: Har bir mushuk bir xil tezlikda ishlayapti.",
-        "a": ["3 daqiqa", "3", "uch daqiqa", "3 daqiqada"]
-    },
-    {
-        "id": 54,
-        "q": "54. 1 ta g'isht 1 kilogramm va yarim g'isht og'irligiga teng. To'liq g'isht necha kilogramm?",
-        "image": "https://images.unsplash.com/photo-1590077213355-cf9f2e5e5d72?w=800",
-        "hint": "💡 Maslahat: Tenglamani tuzing.",
-        "a": ["2 kg", "2 kilogramm", "2", "2kg"]
-    },
-    {
-        "id": 55,
-        "q": "55. Daraxtda 20 ta olma bor edi. 5 tasi tushib ketdi. Daraxtda nechta olma qoldi?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Maslahat: Oddiy hisob.",
-        "a": ["15", "15 ta", "15 dona", "15ta"]
-    },
-    {
-        "id": 56,
-        "q": "56. 10 dan 1 ni necha marta ayirish mumkin?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Maslahat: Birinchi marta ayirgandan keyin son o'zgaradi.",
-        "a": ["1 marta", "bir marta", "1"]
-    },
-    {
-        "id": 57,
-        "q": "57. 30 ni uchdan biriga bo'lib, 10 qo'shsangiz nechchi chiqadi?",
-        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
-        "hint": "💡 Maslahat: 30 ning uchdan biri 10.",
-        "a": ["100", "100 ta", "yuz", "100ta"]
-    },
-    {
-        "id": 58,
-        "q": "58. Bir oyda 28 kun bor. Nechta oyda 28 kun bor?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Maslahat: Faqat fevral haqida o'ylamang.",
-        "a": ["12 ta", "12", "barcha oyda", "12 oyda", "hammasida", "hamma oyda"]
-    },
-    {
-        "id": 59,
-        "q": "59. Bir yilda nechta oy 30 kundan iborat?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Maslahat: Aynan 30 kunlik oylarni sanang.",
-        "a": ["4 ta", "4", "to'rtta", "4ta", "11 ta"]
-    },
-    {
-        "id": 60,
-        "q": "60. Qaysi oyda 28 kun bo'lishi aniq?",
-        "image": "https://images.unsplash.com/photo-1455849318743-b2233052fcff?w=800",
-        "hint": "💡 Maslahat: Barcha oylarni o'ylab ko'ring.",
-        "a": ["har oyda", "barcha oyda", "12 oyda", "hamma oyda", "fevral"]
-    },
-    {
-        "id": 61,
-        "q": "61. Soat 3:00 bo'lsa, soat strelkasi va minut strelkasi orasidagi burchak nechchi daraja?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Maslahat: Strelkalar to'g'ri burchak hosil qiladi.",
-        "a": ["90", "90 daraja", "90 gradus"]
-    },
-    {
-        "id": 62,
-        "q": "62. Soat 6:00 bo'lsa, ikki strelka orasidagi burchak nechchi daraja?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Maslahat: Strelkalar qarama-qarshi turadi.",
-        "a": ["180", "180 daraja", "180 gradus"]
-    },
-    {
-        "id": 63,
-        "q": "63. Bir odamning 4 ta qizi bor. Har bir qizning bittadan ukasi bor. Jami nechta farzand?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Maslahat: Uka hamma qizlar uchun bitta bo'lishi mumkin.",
-        "a": ["5 ta", "5", "beshta", "5ta"]
-    },
-    {
-        "id": 64,
-        "q": "64. Bir xonada 7 ta sham bor. 3 tasi o'chib qoldi. Nechta sham bor?",
-        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
-        "hint": "💡 Maslahat: Savol yonib turgan shamlar haqida emas.",
-        "a": ["7 ta", "7", "yettita", "7ta"]
-    },
-    {
-        "id": 65,
-        "q": "65. Sizda gugurt bor. Qorong'i xonada sham, kerosin chiroq va pechka turibdi. Avval nimani yoqasiz?",
-        "image": "https://images.unsplash.com/photo-1509565840034-3c2f1f4f5f75?w=800",
-        "hint": "💡 Maslahat: Olov kerak bo'ladi.",
-        "a": ["gugurtni", "gugurt", "avval gugurtni"]
-    },
-    {
-        "id": 66,
-        "q": "66. Qaysi narsa sindirilsa, undan keyin ishlatiladi?",
-        "image": "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=800",
-        "hint": "💡 Maslahat: Nonushtada ko'p uchraydi.",
-        "a": ["tuxum", "tuxumni", "koks va tuxum"]
-    },
-    {
-        "id": 67,
-        "q": "67. Qaysi narsa ochilmasdan turib ichiladi?",
-        "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800",
-        "hint": "💡 Maslahat: Ustiga qopqoq qo'yilgan idishni o'ylang.",
-        "a": ["somoncha bilan ichimlik", "trubka orqali ichimlik", "naycha orqali", "trubkada"]
-    },
-    {
-        "id": 68,
-        "q": "68. Qaysi narsa yuradi, lekin oyog'i yo'q?",
-        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
-        "hint": "💡 Maslahat: Vaqt ham 'yuradi'.",
-        "a": ["soat", "vaqt", "soat yuradi", "daryo", "suv"]
-    },
-    {
-        "id": 69,
-        "q": "69. Qaysi narsa gapiradi, lekin og'zi yo'q?",
-        "image": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800",
-        "hint": "💡 Maslahat: U tovushni qaytarishi mumkin.",
-        "a": ["aks-sado", "echo", "sado", "aks sado"]
-    },
-    {
-        "id": 70,
-        "q": "70. Qaysi narsa sizga javob beradi, lekin o'zi savol bermaydi?",
-        "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "hint": "💡 Maslahat: Ovoz bilan bog'liq.",
-        "a": ["aks-sado", "echo", "sado", "telefon", "aks sado"]
-    },
-    {
-        "id": 71,
-        "q": "71. Qaysi narsa bir joyda turib butun dunyoni aylanib chiqadi?",
-        "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
-        "hint": "💡 Maslahat: U xat yoki posilkada bo'lishi mumkin.",
-        "a": ["marka", "pochta markasi", "pochta"]
-    },
-    {
-        "id": 72,
-        "q": "72. Qaysi narsa devordan o'ta oladi, lekin devorni buzmaydi?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 Maslahat: Yorug'lik haqida o'ylang.",
-        "a": ["nur", "yorug'lik", "soya", "ovoz"]
-    },
-    {
-        "id": 73,
-        "q": "73. Qaysi narsa derazadan kiradi, lekin eshikdan kirmaydi?",
-        "image": "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?w=800",
-        "hint": "💡 Maslahat: Uni ko'ra olasiz, lekin ushlay olmaysiz.",
-        "a": ["quyosh nuri", "nur", "yorug'lik"]
-    },
-    {
-        "id": 74,
-        "q": "74. Qaysi narsa qancha ko'p olinsa, shuncha ko'p ortida qoladi?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 Maslahat: Yurish bilan bog'liq.",
-        "a": ["qadam", "qadamlar", "iz"]
-    },
-    {
-        "id": 75,
-        "q": "75. Qaysi narsa yuradi-yuradi, lekin joyidan qimirlamaydi?",
-        "image": "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=800",
-        "hint": "💡 Maslahat: Vaqtni ko'rsatadigan narsani o'ylang.",
-        "a": ["soat", "soat strelkasi"]
-    },
-    {
-        "id": 76,
-        "q": "76. Qaysi narsa boshiga tegsa ham og'riq sezmaydi?",
-        "image": "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800",
-        "hint": "💡 Maslahat: Mixning boshi bor.",
-        "a": ["mix", "mixning boshi"]
-    },
-    {
-        "id": 77,
-        "q": "77. Qaysi narsa ko'tarilgan sari pastga tushadi?",
-        "image": "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=800",
-        "hint": "💡 Maslahat: Harorat bilan bog'liq.",
-        "a": ["termometr", "termometrdagi simob"]
-    },
-    {
-        "id": 78,
-        "q": "78. Qaysi narsa yozda ham, qishda ham bir xil rangda qoladi?",
-        "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
-        "hint": "💡 Maslahat: Doim yashil daraxtni o'ylang.",
-        "a": ["archa", "doim yashil daraxt", "qarag'ay"]
-    },
-    {
-        "id": 79,
-        "q": "79. Bir odamning oldida ikki kishi, orqasida ikki kishi va o'rtasida bir kishi turibdi. Jami nechta odam bor?",
-        "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
-        "hint": "💡 Maslahat: Odamlar bir qatorda turishi mumkin.",
-        "a": ["5 ta", "5", "beshta", "3 ta", "3", "3 kishi"]
-    },
-    {
-        "id": 80,
-        "q": "80. Uchta odam bir soyabon ostida turibdi, lekin hech biri ho'l bo'lmadi. Nega?",
-        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
-        "hint": "💡 Maslahat: Yomg'ir yog'ayotgan bo'lishi shart emas.",
-        "a": ["yomg'ir yog'mayotgan edi", "yomg'ir yo'q edi", "yomg'ir yog'mayapti"]
-    },
-    {
-        "id": 81,
-        "q": "81. Bir odamning 10 ta barmog'i bor. 10 odamning nechta barmog'i bor?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Maslahat: Har bir odamda 10 ta barmoq bor deb hisoblang.",
-        "a": ["100 ta", "100", "yuzta", "100ta"]
-    },
-    {
-        "id": 82,
-        "q": "82. Bir kishi 20 yoshda, ammo tug'ilgan kunini atigi 5 marta nishonlagan. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?w=800",
-        "hint": "💡 Maslahat: Tug'ilgan sanasi oddiy sana emas.",
-        "a": ["29 fevralda tug'ilgan", "29-fevral", "kabisa kuni", "29 fevral", "29 fevralda tugilgan", "29 fevralda"]
-    },
-    {
-        "id": 83,
-        "q": "83. Bir odam 2020-yilda 20 yoshda edi, 2025-yilda esa 15 yoshda bo'ldi. Bu qanday mumkin?",
-        "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
-        "hint": "💡 Maslahat: Yillar oddiy tartibda o'tmayapti.",
-        "a": ["miloddan avval", "miloddan avvalgi", "bc", "miloddan ilgari"]
-    },
-    {
-        "id": 84,
-        "q": "84. Qaysi raqamni teskari aylantirsangiz ham o'sha raqam bo'lib qoladi?",
-        "image": "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "hint": "💡 Maslahat: Raqamning shakliga qarang.",
-        "a": ["0", "8", "nol", "sakkiz"]
-    },
-    {
-        "id": 85,
-        "q": "85. 2 + 2 × 2 nechchi bo'ladi?",
-        "image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "hint": "💡 Maslahat: Amal bajarish tartibiga rioya qiling.",
-        "a": ["6", "olti"]
-    },
-    {
-        "id": 86,
-        "q": "86. 100 dan 10 ni necha marta ayirsangiz 50 qoladi?",
-        "image": "https://images.unsplash.com/photo-1596495578066-9a8e5e2c6f7d?w=800",
-        "hint": "💡 Maslahat: Oddiy hisob emas, savolning qanday berilganiga e'tibor bering.",
-        "a": ["1 marta", "bir marta", "5 marta", "1"]
-    },
-    {
-        "id": 87,
-        "q": "87. Bir daraxtda 6 ta qush bor. Siz 2 tasini qo'rqitdingiz. Nechta qush daraxtda qoladi?",
-        "image": "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=800",
-        "hint": "💡 Maslahat: Qo'rqqan qushlar uchib ketishi mumkin.",
-        "a": ["4 ta", "4", "to'rtta", "0", "hech qancha"]
-    },
-    {
-        "id": 88,
-        "q": "88. 4 ta tuxumning har birini 5 daqiqadan qaynatish kerak. Barchasini bir vaqtda qaynatsangiz qancha vaqt ketadi?",
-        "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
-        "hint": "💡 Maslahat: Tuxumlarni bir vaqtda qozonga solish mumkin.",
-        "a": ["5 daqiqa", "5", "besh daqiqa", "5 daqiqada"]
-    },
-    {
-        "id": 89,
-        "q": "89. 3 ta tuxum 3 daqiqada pishadi. 9 ta tuxum bir qozonda necha daqiqada pishadi?",
-        "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
-        "hint": "💡 Maslahat: Ular bir vaqtda pishishi mumkin.",
-        "a": ["3 daqiqa", "3", "uch daqiqa", "3 daqiqada"]
-    },
-    {
-        "id": 90,
-        "q": "90. Bir xonada 4 ta burchak bor. Har burchakda bittadan sham turibdi. Har shamning yonida 2 ta sham bor. Jami nechta sham bor?",
-        "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
-        "hint": "💡 Maslahat: Shamlar bir-birining yonida bo'lishi mumkin.",
-        "a": ["4 ta", "4", "to'rtta", "4ta"]
-    },
-    {
-        "id": 91,
-        "q": "91. Bir savatda 5 ta olma bor. 5 bola bittadan olma oldi, lekin savatda bitta olma qoldi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-        "hint": "💡 Maslahat: Oxirgi bola olmani savati bilan olishi mumkin.",
-        "a": ["oxirgi bola savatdagi olmani oldi", "savat bilan oldi", "olmani savati bilan oldi", "savatda oldi"]
-    },
-    {
-        "id": 92,
-        "q": "92. Bir odam do'konga kirib 10 000 so'mlik mahsulot oldi va 20 000 so'm berdi. Sotuvchi 10 000 qaytim berdi. Keyin u mahsulotni qaytarib berdi. Sotuvchi qancha pulni qaytarishi kerak?",
-        "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800",
-        "hint": "💡 Maslahat: Xaridor avval mahsulot uchun qancha to'lagan?",
-        "a": ["10000", "10 000", "10000 so'm", "10 ming", "10000 som"]
-    },
-    {
-        "id": 93,
-        "q": "93. Bir xonada 3 ta it bor. Har bir itning qarshisida 2 ta it bor. Jami nechta it bor?",
-        "image": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800",
-        "hint": "💡 Maslahat: Itlar bir-biriga qarab turishi mumkin.",
-        "a": ["3 ta", "3", "uchta", "3ta"]
-    },
-    {
-        "id": 94,
-        "q": "94. Qaysi narsa suvga tushsa ham ho'l bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
-        "hint": "💡 Maslahat: U yorug'lik bilan bog'liq.",
-        "a": ["soya", "aks", "soyasi", "nur"]
-    },
-    {
-        "id": 95,
-        "q": "95. Qaysi narsa sizdan oldin keladi, lekin uni ko'ra olmaysiz?",
-        "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800",
-        "hint": "💡 Maslahat: Kelajak haqida o'ylang.",
-        "a": ["kelajak", "ertangi kun", "kelajakdagi vaqt", "ertaga"]
-    },
-    {
-        "id": 96,
-        "q": "96. Qaysi narsa doim oldinda bo'ladi, lekin unga hech qachon yetib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800",
-        "hint": "💡 Maslahat: Vaqt bilan bog'liq.",
-        "a": ["kelajak", "ertangi kun", "ertaga", "ufq"]
-    },
-    {
-        "id": 97,
-        "q": "97. Qaysi narsa bir marta aytilsa, uni qaytarib bo'lmaydi?",
-        "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800",
-        "hint": "💡 Maslahat: So'z bilan bog'liq.",
-        "a": ["so'z", "aytilgan so'z", "gap", "soz"]
-    },
-    {
-        "id": 98,
-        "q": "98. Qaysi narsa qancha ko'p bo'lsa, shuncha kam og'irlik qiladi?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 Maslahat: Juda yengil narsalarni o'ylang.",
-        "a": ["havo", "havo pufakchalari", "sharlar", "teshiklar"]
-    },
-    {
-        "id": 99,
-        "q": "99. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
-        "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800",
-        "hint": "💡 Maslahat: Tarozi bilan bog'liq.",
-        "a": ["tarozi", "tarozi pallasi", "anchar"]
-    },
-    {
-        "id": 100,
-        "q": "100. Qaysi narsa har doim siz bilan, ammo siz uni ko'ra olmaysiz?",
-        "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-        "hint": "💡 Maslahat: U tanangizga tegishli emas.",
-        "a": ["soya", "nafas", "havo", "aql"]
-    },
-    {
-        "id": 101,
-        "q": "101. Bir odam oynaga qaradi va o'zini ko'rmadi. Nega?",
-        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800",
-        "hint": "💡 Maslahat: Oyna haqida emas, atrofdagi sharoit haqida o'ylang.",
-        "a": ["qorong'i edi", "xona qorong'i edi", "yorug'lik yo'q edi", "qorongida"]
-    },
-    {
-        "id": 102,
-        "q": "102. Bir uyda barcha derazalar janubga qaragan. Uy yonidan ayiq o'tdi. Ayiq qanday rangda?",
-        "image": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=800",
-        "hint": "💡 Maslahat: Barcha derazalar janubga qarashi mumkin bo'lgan joyni o'ylang.",
-        "a": ["oq", "oq rangda", "oq ayiq"]
-    },
-    {
-        "id": 103,
-        "q": "103. Bir odam 5 kun uxlamasdan yashadi, lekin sog'-salomat qoldi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
-        "hint": "💡 Maslahat: U faqat kechasi uxlamagan bo'lishi shart emas.",
-        "a": ["kechasi uxlagan", "kunduzi uxlagan", "u kechasi uxlagan", "kechqurun uxlagan", "kechasi uxladi"]
-    },
-    {
-        "id": 104,
-        "q": "104. Bir odam yomg'irda boshiga hech narsa kiymadi, lekin sochlari ho'l bo'lmadi. Nega?",
-        "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
-        "hint": "💡 Maslahat: Uning sochiga e'tibor bering.",
-        "a": ["u kal edi", "sochi yo'q edi", "kal", "kal edi", "sochi yoq"]
-    },
-    {
-        "id": 105,
-        "q": "105. Bir odamning qo'lida 5 ta barmog'i bor, lekin ularning hech biri uning qo'li emas. Bu qanday mumkin?",
-        "image": "https://images.unsplash.com/photo-1504159506876-f8338247a14a?w=800",
-        "hint": "💡 Maslahat: 'Qo'lida' so'zining boshqa ma'nosini o'ylang.",
-        "a": ["qo'lqopda", "qo'lqop", "qo'lqopning barmoqlari", "qolqop"]
-    },
-    {
-        "id": 106,
-        "q": "106. Bir kishi xonaga kirib, chiroqni yoqdi. Chiroq yoqilgach xona kichrayib qoldi. Qanday qilib?",
-        "image": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800",
-        "hint": "💡 Maslahat: Xonaning o'zi emas, ko'rinishi o'zgargan.",
-        "a": ["soya yo'qoldi", "yorug'lik sababli ko'rinishi o'zgardi", "soya yoqoldi"]
-    },
-    {
-        "id": 107,
-        "q": "107. Siz qorong'i xonaga kirdingiz. Xonada gugurt, sham, chiroq va pechka bor. Sizda faqat bitta gugurt bor. Birinchi bo'lib nimani yoqasiz?",
-        "image": "https://images.unsplash.com/photo-1509565840034-3c2f1f4f5f75?w=800",
-        "hint": "💡 Maslahat: Avval olov manbasini yoqish kerak.",
-        "a": ["gugurtni", "gugurt", "avval gugurtni"]
-    }
+   [
+  {
+    "id": 1,
+    "q": "1. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
+    "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800",
+    "hint": "💡 Maslahat: Tarozi yoki kema bilan bog'liq.",
+    "a": ["kema yakori", "yakor", "anker", "tarozi", "tarozi pallasi"]
+  },
+  {
+    "id": 2,
+    "q": "2. O'zi yemaydi, lekin hammani ovqatlantiradi. U nima?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Oshxonada ishlatiladigan idish-tovoq.",
+    "a": ["qoshiq", "qoshiq"]
+  },
+  {
+    "id": 3,
+    "q": "3. U qanchalik ko'p bo'lsa, shunchalik kam ko'rasiz. U nima?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Tunda paydo bo'ladi.",
+    "a": ["qorong'ilik", "qorongilik", "qorong'u"]
+  },
+  {
+    "id": 4,
+    "q": "4. U doim sizning qarshingizda, lekin uni hech qachon ko'ra olmaysiz. U nima?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Hali yetib kelmagan vaqt.",
+    "a": ["kelajak", "kelajak vaqt"]
+  },
+  {
+    "id": 5,
+    "q": "5. Nimaning boshi bor, dumi bor, lekin oyog'i va tanasi yo'q?",
+    "image": "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=800",
+    "hint": "💡 Maslahat: Hamyoningizdagi metal pul.",
+    "a": ["tanga", "som", "so'm", "tanga pul"]
+  },
+  {
+    "id": 6,
+    "q": "6. Qaysi idishdan hech qachon ovqat yeb bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800",
+    "hint": "💡 Maslahat: Ichida hech narsa yo'q idish.",
+    "a": ["bo'sh idishdan", "bosh idishdan", "bo'sh idish", "bosh idish"]
+  },
+  {
+    "id": 7,
+    "q": "7. Uni ushlab turish uchun qo'l kerak emas, lekin u ushlanmasa yo'qoladi. U nima?",
+    "image": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800",
+    "hint": "💡 Maslahat: Ichingizga yutasiz yoki kimgadir berasiz.",
+    "a": ["nafas", "va'da", "vada"]
+  },
+  {
+    "id": 8,
+    "q": "8. Dunyodagi barcha insonlar bir vaqtning o'zida nima qilishadi?",
+    "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+    "hint": "💡 Maslahat: Yoshi ulg'ayish jarayoni.",
+    "a": ["qarishadi", "yoshi kattalashadi", "qarish"]
+  },
+  {
+    "id": 9,
+    "q": "9. Qancha ko'p olsangiz, shuncha kattalashadigan narsa nima?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Yerda kavlanadigan narsa.",
+    "a": ["chuqur", "o'ra", "ora"]
+  },
+  {
+    "id": 10,
+    "q": "10. U sizga tegishli, lekin undan boshqalar ko'proq foydalanishadi. U nima?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Sizni chaqirishganda aytishadi.",
+    "a": ["ismingiz", "ism", "ot"]
+  },
+  {
+    "id": 11,
+    "q": "11. Barcha tillarda gapira oladigan, lekin tili yo'q narsa nima?",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
+    "hint": "💡 Maslahat: Tog'da baqirsangiz qaytib keladigan ovoz.",
+    "a": ["aks-sado", "aks sado", "sado"]
+  },
+  {
+    "id": 12,
+    "q": "12. Qaysi savolga hech qachon 'Ha' deb javob berib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+    "hint": "💡 Maslahat: Inson uxlab yotganida beriladigan savol.",
+    "a": ["uxlayapsizmi", "uxlayapsizmi?", "uxlayapsanmi"]
+  },
+  {
+    "id": 13,
+    "q": "13. Suvda cho'kmaydi, olovda yonmaydi. U nima?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Suvning muzlagan holati.",
+    "a": ["muz"]
+  },
+  {
+    "id": 14,
+    "q": "14. Bir odam yomg'irda soyabonsiz yurgan bo'lsa ham sochi ho'l bo'lmadi. Nega?",
+    "image": "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800",
+    "hint": "💡 Maslahat: Uning boshida nima yo'q?",
+    "a": ["kachal", "sochi yo'q", "sochi yoq", "boshi kal"]
+  },
+  {
+    "id": 15,
+    "q": "15. Xonada 10 ta sham yonayotgandi. Ulardan 3 tasi o'chirildi. Qancha sham qoldi?",
+    "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
+    "hint": "💡 Maslahat: O'chirilmaganlari erib yo'q bo'lib ketadi.",
+    "a": ["3 ta", "3", "3 ta sham"]
+  },
+  {
+    "id": 16,
+    "q": "16. Nimani yeb bo'lmaydi, lekin tayyorlash mumkin?",
+    "image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+    "hint": "💡 Maslahat: Maktabda beriladigan topshiriq.",
+    "a": ["dars", "topshiriq", "darslik"]
+  },
+  {
+    "id": 17,
+    "q": "17. U har doim keladi, lekin hech qachon bugun bo'lmaydi. U nima?",
+    "image": "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=800",
+    "hint": "💡 Maslahat: Bugundan keyin keladigan kun.",
+    "a": ["ertangi kun", "erta", "ertagacha"]
+  },
+  {
+    "id": 18,
+    "q": "18. Qatorda 5 ta olma bor. Siz ulardan 3 tasini oldingiz. Sizda nechta olma bor?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Qo'lingizga nechta olma oldingiz?",
+    "a": ["3 ta", "3", "3 ta olma"]
+  },
+  {
+    "id": 19,
+    "q": "19. Nima chaqilganda yoki singanda ishlay boshlaydi?",
+    "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+    "hint": "💡 Maslahat: Qobiqli oziq-ovqat mahsuloti.",
+    "a": ["tuxum", "yong'oq", "yongoq"]
+  },
+  {
+    "id": 20,
+    "q": "20. U yugurishi mumkin, lekin yurolmaydi. U nima?",
+    "image": "https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?w=800",
+    "hint": "💡 Maslahat: Oqib yotgan suv havzasi.",
+    "a": ["daryo", "soy", "irmoq"]
+  },
+  {
+    "id": 21,
+    "q": "21. Bir kishi qorong'i xonada o'tiribdi, chiroq yo'q. U kitob o'qiyapti. Bu qanday mumkin?",
+    "image": "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
+    "hint": "💡 Maslahat: Ko'zi ojizlar alifbosi.",
+    "a": ["brayl alifbosi", "brayl", "ko'zi ojiz", "kozi ojiz"]
+  },
+  {
+    "id": 22,
+    "q": "22. Nechta oyda 28 kun bor?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Barcha oylarda kamida 28 kun bor-yo'qligini o'ylang.",
+    "a": ["12 ta", "hamma oyda", "barcha oylarda", "12"]
+  },
+  {
+    "id": 23,
+    "q": "23. Qaysi toshni daryodan topib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Suvga tushmagan tosh.",
+    "a": ["quruq tosh", "quruq toshni", "quruq"]
+  },
+  {
+    "id": 24,
+    "q": "24. Qaysi qo'l bilan choyni aralashtirgan ma'qul?",
+    "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800",
+    "hint": "💡 Maslahat: Qo'l bilan emas, boshqa narsa bilan aralashtiriladi.",
+    "a": ["qoshiq bilan", "qoshiq bilan", "qoshiq"]
+  },
+  {
+    "id": 25,
+    "q": "25. Nima har doim tushadi, lekin hech qachon ko'tarilmaydi?",
+    "image": "https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=800",
+    "hint": "💡 Maslahat: Osmondan yog'adigan yog'in.",
+    "a": ["yomg'ir", "yomgir", "qor"]
+  },
+  {
+    "id": 26,
+    "q": "26. Nimani chap qo'l bilan ushlash mumkin, lekin o'ng qo'l bilan ushlab bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800",
+    "hint": "💡 Maslahat: O'ng qo'lingizdagi bo'g'im.",
+    "a": ["o'ng tirsakni", "ong tirsakni", "o'ng tirsak"]
+  },
+  {
+    "id": 27,
+    "q": "27. O'z og'irligi yo'q, lekin uni idishga solsangiz idish yengillashadi. U nima?",
+    "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800",
+    "hint": "💡 Maslahat: Narsada paydo bo'ladigan o'ra/bo'shliq.",
+    "a": ["teshik"]
+  },
+  {
+    "id": 28,
+    "q": "28. Qaysi so'z lug'atda xato yozilgan bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: So'zning o'zi xato deb ataladi.",
+    "a": ["xato", "xato so'zi"]
+  },
+  {
+    "id": 29,
+    "q": "29. Qaysi oy eng qisqa oy hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+    "hint": "💡 Maslahat: Nomi bor-yo'g'i 3 ta harfdan iborat.",
+    "a": ["may", "may oyi"]
+  },
+  {
+    "id": 30,
+    "q": "30. Otasining o'g'li, lekin u insonning ukasi ham, akasi ham emas. U kim?",
+    "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
+    "hint": "💡 Maslahat: O'sha insonning shaxsan o'zi.",
+    "a": ["o'zi", "ozi", "u insonning o'zi"]
+  },
+  {
+    "id": 31,
+    "q": "31. Nima bir joyda turib ham butun dunyoni aylanib chiqa oladi?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: Xat yoki konvertga yopishtiriladi.",
+    "a": ["pochta markasi", "marka"]
+  },
+  {
+    "id": 32,
+    "q": "32. Qaysi daraxt shoxida qush yomg'ir yog'ayotganda o'tirishi mumkin?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Yomg'irda qolgan shox qanday bo'ladi?",
+    "a": ["ho'l shoxda", "hol shoxda", "ho'l"]
+  },
+  {
+    "id": 33,
+    "q": "33. Qanday samolyotdan sakrasangiz soyabon (parashyut) kerak emas?",
+    "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+    "hint": "💡 Maslahat: Yerdan ko'tarilmagan samolyot.",
+    "a": ["yerdagi samolyotdan", "yerdagi", "uchmayotgan samolyotdan"]
+  },
+  {
+    "id": 34,
+    "q": "34. Bitta uyda 4 ta burchak bor, har bir burchakda bittadan mushuk o'tiribdi. Nechta mushuk bor?",
+    "image": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800",
+    "hint": "💡 Maslahat: Burchaklarni sanang.",
+    "a": ["4 ta", "4", "to'rtta"]
+  },
+  {
+    "id": 35,
+    "q": "35. Fil va chumoli uchrashdi. Nega fil qochib ketdi?",
+    "image": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=800",
+    "hint": "💡 Maslahat: Hazil mantiqiy savol.",
+    "a": ["oyog'ini bosib oldi", "oyogini bosib oldi"]
+  },
+  {
+    "id": 36,
+    "q": "36. Qaysi joyda yakshanba shanbadan oldin keladi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: Alifbo tartibi bo'yicha kitob.",
+    "a": ["lug'atda", "lugatda", "lug'at"]
+  },
+  {
+    "id": 37,
+    "q": "37. Ikki ota va ikki o'g'il o'rmondan 3 ta quyonni olib kelishdi. Ularga 1 tadan tegdi. Bu qanday bo'ldi?",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+    "hint": "💡 Maslahat: Oila a'zolarining avlodi (3 kishi).",
+    "a": ["bobo ota va o'g'il", "bobo ota ogil", "3 kishi edi"]
+  },
+  {
+    "id": 38,
+    "q": "38. Qaysi kalit bilan eshikni ochib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=800",
+    "hint": "💡 Maslahat: Musiqiy kalit yoki yer ostidan chiqadigan suv.",
+    "a": ["buloq kaliti", "musiqa kaliti", "musiqiy kalit", "buloq"]
+  },
+  {
+    "id": 39,
+    "q": "39. Suv ostida o'tirib guvohnoma topshirsa bo'ladimi?",
+    "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+    "hint": "💡 Maslahat: G'avvoshlik kurslari.",
+    "a": ["bo'ladi", "boladi", "g'avvoshlik"]
+  },
+  {
+    "id": 40,
+    "q": "40. Suv sathi ko'tarilganda kema va unga osilgan zina nima bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+    "hint": "💡 Maslahat: Kema suvda suzib yuradi.",
+    "a": ["kema ham ko'tariladi", "zina ham ko'tariladi", "suv yetmaydi"]
+  },
+  {
+    "id": 41,
+    "q": "41. Ko'zi bor, lekin ko'rmaydi. U nima?",
+    "image": "https://images.unsplash.com/photo-1512290900673-0498b368a52e?w=800",
+    "hint": "💡 Maslahat: Tikuvchilik quroli yoki kartoshka.",
+    "a": ["igna", "kartoshka", "igna ko'zi"]
+  },
+  {
+    "id": 42,
+    "q": "42. Nima qancha ko'p qurisa, shuncha ho'l bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=800",
+    "hint": "💡 Maslahat: Cho'milgandan keyin ishlatiladi.",
+    "a": ["sochiq"]
+  },
+  {
+    "id": 43,
+    "q": "43. Odam qachon xonada boshsiz bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+    "hint": "💡 Maslahat: Boshini derazadan chiqarib turganda.",
+    "a": ["derazadan boshini chiqarganda", "boshini chiqarganda"]
+  },
+  {
+    "id": 44,
+    "q": "44. Yerda yotgan qaysi narsaning ustidan sakrab o'tib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Yorug'likda paydo bo'ladigan aksi.",
+    "a": ["o'z soyasi", "soya", "devor yonidagi narsa"]
+  },
+  {
+    "id": 45,
+    "q": "45. Nima to'xtovsiz harakat qiladi, lekin joyidan jilmaydi?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Devorga osib qo'yiladigan buyum.",
+    "a": ["soat"]
+  },
+  {
+    "id": 46,
+    "q": "46. Oq it qora dengizga tushsa nima bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Suvga tushgan har qanday narsa nima bo'ladi?",
+    "a": ["ho'l bo'ladi", "hol boladi", "ho'llanadi"]
+  },
+  {
+    "id": 47,
+    "q": "47. Nimaning xotirasi zo'r, lekin o'zi fikrlay olmaydi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Axborot saqlaydigan texnika.",
+    "a": ["kompyuter", "xotira kartasi", "fleshka"]
+  },
+  {
+    "id": 48,
+    "q": "48. Qanday savolga har doim har xil javob beriladi?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Soatga qarab javob beriladigan savol.",
+    "a": ["soat necha bo'ldi", "soat necha", "vaqt necha bo'ldi"]
+  },
+  {
+    "id": 49,
+    "q": "49. Mart oyida bor, lekin aprelda yo'q. Mayda bor, iyunda yo'q. U nima?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: So'zlar tarkibidagi harf.",
+    "a": ["m harfi", "m", "harf"]
+  },
+  {
+    "id": 50,
+    "q": "50. Bir odam 8 kun uxlab bilmadi. U buni qanday uddaladi?",
+    "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+    "hint": "💡 Maslahat: U kechalari uxlagan.",
+    "a": ["kechasi uxlagan", "kechalari uxlagan", "tunda uxlagan"]
+  }
+  {
+    "id": 51,
+    "q": "51. Mashina burilayotganda qaysi g'ildirak aylanmaydi?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Bagajda turadigan zaxira g'ildirak.",
+    "a": ["zaxira g'ildirak", "zapaska", "zaxira", "zaxiradagi g'ildirak"]
+  },
+  {
+    "id": 52,
+    "q": "52. Poyezd 100 km/soat tezlikda ketyapti. Elektr poyezdi bo'lsa, tutuni qaysi tomonga uchadi?",
+    "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+    "hint": "💡 Maslahat: Elektrda ishlaydigan transport vositasi.",
+    "a": ["tutun chiqarmaydi", "tutuni yo'q", "tutuni yoq", "elektr poyezdda tutun bo'lmaydi"]
+  },
+  {
+    "id": 53,
+    "q": "53. Qaysi kasallik bilan faqat suvda/kemada og'rish mumkin?",
+    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+    "hint": "💡 Maslahat: Suv va kemaga bog'liq kasallik.",
+    "a": ["dengiz kasalligi", "dengiz kasalligi bilan"]
+  },
+  {
+    "id": 54,
+    "q": "54. Qorong'i xonada kerosin lampasi, sham va gaz plitasi bor. Qo'lingizda 1 ta gugurt bo'lsa, birinchi nimani yoqasiz?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Qolganlarini yoqish uchun birinchi kerak bo'ladigan narsa.",
+    "a": ["gugurt", "gugurtni", "chirishni"]
+  },
+  {
+    "id": 55,
+    "q": "55. Nimaga tez yugursangiz ham yetib ololmaysiz?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Yorug'likda ketningizdan qolmaydigan aksi.",
+    "a": ["o'z soyangizga", "soya", "soyaga", "o'z soyasi"]
+  },
+  {
+    "id": 56,
+    "q": "56. Qaysi matodan ko'ylak tikib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+    "hint": "💡 Maslahat: Poyezd yuradigan temir yo'l.",
+    "a": ["temir yo'l matosidan", "rels", "temir yol matosi"]
+  },
+  {
+    "id": 57,
+    "q": "57. Bitta tuxum 5 minutda pishsa, 4 ta tuxum necha minutda pishadi?",
+    "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+    "hint": "💡 Maslahat: Hamma tuxumlar birga solinadi.",
+    "a": ["5 minutda", "5 minut", "5 daqiqa", "5 daqiqada"]
+  },
+  {
+    "id": 58,
+    "q": "58. Uyning qaysi joyida stulni qo'yib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+    "hint": "💡 Maslahat: Uyning eng tepasi/tobi.",
+    "a": ["shiftida", "potolokda", "shiftga"]
+  },
+  {
+    "id": 59,
+    "q": "59. Har bir insonning 2 tadan bor, lekin o'zi ko'zgusiz ko'ra olmaydi. U nima?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Eshitish organi.",
+    "a": ["quloqlar", "quloq", "quloqlari"]
+  },
+  {
+    "id": 60,
+    "q": "60. Nima pastga qarab o'sadi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Qishda tom ostida osilib turadigan muz.",
+    "a": ["sumalak", "muz tili", "muz sumalak", "muz"]
+  },
+  {
+    "id": 61,
+    "q": "61. Nimani ushlab bo'lmaydi, lekin yo'qotish juda oson?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: To'xtovsiz o'tib boradigan narsa.",
+    "a": ["vaqt", "vaqtni"]
+  },
+  {
+    "id": 62,
+    "q": "62. Toshkentda 1 ta, Samarqandda 2 ta, Buxoroda umuman yo'q. U nima?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Shahar nomlaridagi harf.",
+    "a": ["a harfi", "a", "harf"]
+  },
+  {
+    "id": 63,
+    "q": "63. Bir odam uyining to'rtala devori ham janubga qaragan qilib uy qurdi. Ayiq keldi. Ayiqning rangi qanday?",
+    "image": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=800",
+    "hint": "💡 Maslahat: Shimoliy qutbdagi ayiq.",
+    "a": ["oq", "oq ayiq", "oq rangda"]
+  },
+  {
+    "id": 64,
+    "q": "64. Qirol va malika o'rtasida nima bor?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: So'zlarni bog'lovchi harflar.",
+    "a": ["va bog'lovchisi", "va", "va harfi"]
+  },
+  {
+    "id": 65,
+    "q": "65. O'z joyida turib ham butun dunyoni ko'rsatadi yoki sayr qildiradi. U nima?",
+    "image": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800",
+    "hint": "💡 Maslahat: Dumaloq yer modeli.",
+    "a": ["globus", "xarita"]
+  },
+  {
+    "id": 66,
+    "q": "66. Toshni suvga tashlasangiz u nima bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Suvga tushgan har qanday narsaning holati.",
+    "a": ["ho'l bo'ladi", "ho'llanadi", "cho'kadi va ho'l bo'ladi"]
+  },
+  {
+    "id": 67,
+    "q": "67. Inson tanasining qaysi a'zosi hayajonlanganda ko'zda kattalashadi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Ko'zning ichidagi qismi.",
+    "a": ["ko'z qorachig'i", "koz qorachigi", "qorachiq"]
+  },
+  {
+    "id": 68,
+    "q": "68. Qaysi so'z har doim noto'g'ri aytiladi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: So'zning o'zi noto'g'ri.",
+    "a": ["noto'g'ri", "notogri", "noto'g'ri so'zi"]
+  },
+  {
+    "id": 69,
+    "q": "69. Suv o'rtasida nima bor?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: So'z markazidagi harf.",
+    "a": ["u harfi", "u", "harf"]
+  },
+  {
+    "id": 70,
+    "q": "70. Ot sportida ot nima uchun to'siqdan sakraydi?",
+    "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800",
+    "hint": "💡 Maslahat: To'siq ostidan nima qila olmaydi?",
+    "a": ["ostidan o'ta olmaydi", "tagidan o'ta olmaydi", "ostidan ota olmaydi"]
+  },
+  {
+    "id": 71,
+    "q": "71. Qaysi oyda odamlar eng kam uxlashadi?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Kunlari eng kam bo'lgan oy.",
+    "a": ["fevral", "fevral oyida", "fevralda"]
+  },
+  {
+    "id": 72,
+    "q": "72. Nimaning tishi bor, lekin tishlay olmaydi?",
+    "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800",
+    "hint": "💡 Maslahat: Sochni tartibga solish uchun ishlatiladi.",
+    "a": ["taroq", "arra", "taroq tishlari"]
+  },
+  {
+    "id": 73,
+    "q": "73. Qaysi idishdan umuman suv ichib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800",
+    "hint": "💡 Maslahat: Teshigi bor idish.",
+    "a": ["teshik idishdan", "teshik idish", "bo'sh idish"]
+  },
+  {
+    "id": 74,
+    "q": "74. Nimaning oyog'i bor, lekin yurolmaydi?",
+    "image": "https://images.unsplash.com/photo-1503602642458-232111445657?w=800",
+    "hint": "💡 Maslahat: Xonadagi mebel.",
+    "a": ["stul", "stol", "stul oyog'i", "stol oyog'i"]
+  },
+  {
+    "id": 75,
+    "q": "75. Qaysi qush tuxum qo'ymaydi, lekin tuxumdan chiqadi?",
+    "image": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800",
+    "hint": "💡 Maslahat: Tovuqning erkak jufti.",
+    "a": ["xo'roz", "xoroz"]
+  },
+  {
+    "id": 76,
+    "q": "76. Nima qanchalik toza bo'lsa, shunchalik qora bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800",
+    "hint": "💡 Maslahat: Maktab xonasida bo'r bilan yoziladigan doska.",
+    "a": ["doska", "maktab doskasi", "sinf doskasi"]
+  },
+  {
+    "id": 77,
+    "q": "77. Dengizning o'rtasida nima bor?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: So'z o'rtasidagi harf.",
+    "a": ["n harfi", "n", "harf"]
+  },
+  {
+    "id": 78,
+    "q": "78. Nimaning qanoti bor, lekin ucholmaydi?",
+    "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+    "hint": "💡 Maslahat: Katta binolarning yon taraflari/qismlari.",
+    "a": ["bino qanoti", "bino", "imorat qanoti"]
+  },
+  {
+    "id": 79,
+    "q": "79. Bir kishining 3 ta qizi bor. Har birining bittadan ukasi bor. Nechta farzand bor?",
+    "image": "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800",
+    "hint": "💡 Maslahat: Barcha qizlar uchun bitta uka yetarli.",
+    "a": ["4 ta", "4", "to'rtta"]
+  },
+  {
+    "id": 80,
+    "q": "80. Qaysi tugmani kiyimda bosib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800",
+    "hint": "💡 Maslahat: Kiyimga tikilgan oddiy tugma.",
+    "a": ["kiyim tugmasini", "tikilgan tugmani", "tugma"]
+  },
+  {
+    "id": 81,
+    "q": "81. Nima o'z egasiga va uni yasagan kishiga kerak emas, ishlatgan kishi ko'rmaydi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Mayit solinadigan yog'och buyum.",
+    "a": ["tobut"]
+  },
+  {
+    "id": 82,
+    "q": "82. Yerdan ko'tarish oson, lekin uzoqqa otish qiyin bo'lgan narsa nima?",
+    "image": "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800",
+    "hint": "💡 Maslahat: Qushning yengil pati.",
+    "a": ["par", "qush pati", "pat"]
+  },
+  {
+    "id": 83,
+    "q": "83. Har bir odamda bor, lekin barmoqlarda hech qachon bir xil bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Biometrik identifikatsiya vositasi.",
+    "a": ["barmoq izi", "barmoq izlari"]
+  },
+  {
+    "id": 84,
+    "q": "84. Nima tun-u kun ishlaydi, lekin charchamaydi?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Ko'krak qafasidagi muhim organ yoki soat.",
+    "a": ["yurak", "soat"]
+  },
+  {
+    "id": 85,
+    "q": "85. Qaysi hayvon o'z nomini aytib baqiradi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Boshqa qushlar iniga tuxum qo'yadigan qush.",
+    "a": ["kakku", "kakku qushi"]
+  },
+  {
+    "id": 86,
+    "q": "86. Nima uchun qarg'a shoxga qo'nadi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Uchishdan charchagani uchun.",
+    "a": ["charchagani uchun", "uchishdan charchagani uchun"]
+  },
+  {
+    "id": 87,
+    "q": "87. Har kuni ovqat yeydi, suv ichsa o'ladi. U nima?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: O'tin bilan yonadigan narsa.",
+    "a": ["olov", "olam"]
+  },
+  {
+    "id": 88,
+    "q": "88. Echki 6 yoshga kirsa nima bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1524024973431-2ad916746881?w=800",
+    "hint": "💡 Maslahat: Keyingi yoshga o'tadi.",
+    "a": ["7 yoshga o'tadi", "7 yoshga kiradi", "7-yosh bo'ladi"]
+  },
+  {
+    "id": 89,
+    "q": "89. Dunyoda eng tez narsa nima?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Inson miyasida zabil keladigan fikr yoki yorug'lik.",
+    "a": ["xayol", "yorug'lik", "fikr"]
+  },
+  {
+    "id": 90,
+    "q": "90. Ko'zingizni yumganingizda nimani ko'rasiz?",
+    "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+    "hint": "💡 Maslahat: Tunda uxlaganda ko'riladigan holat.",
+    "a": ["tush", "qorong'ilik", "qorongilik"]
+  },
+  {
+    "id": 91,
+    "q": "91. Qo'lsiz va oyoqsiz eshikni ochadigan narsa nima?",
+    "image": "https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=800",
+    "hint": "💡 Maslahat: Kuchli esadigan havo oqimi.",
+    "a": ["shamol"]
+  },
+  {
+    "id": 92,
+    "q": "92. Nimaning tomiri bor, lekin o'simlik emas?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Og'iz ichidagi a'zo yoki qon tomiri.",
+    "a": ["tish", "qon tomiri", "tish tomiri"]
+  },
+  {
+    "id": 93,
+    "q": "93. Qaysi kemada dengizchilar bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Koinotga uchadigan transport.",
+    "a": ["kosmik kemada", "kosmik kema", "koinot kemasida"]
+  },
+  {
+    "id": 94,
+    "q": "94. Cho'ntagingizda hech narsa yo'q, lekin unda nimadir bor. U nima?",
+    "image": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800",
+    "hint": "💡 Maslahat: Kiyim yirtilganda paydo bo'ladi.",
+    "a": ["teshik"]
+  },
+  {
+    "id": 95,
+    "q": "95. Qaysi soat kuniga ikki marta to'g'ri vaqtni ko'rsatadi?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Ishlamayotgan soat.",
+    "a": ["buzilgan soat", "to'xtagan soat", "ishlamaydigan soat"]
+  },
+  {
+    "id": 96,
+    "q": "96. Nima ovqatni shirin qiladi, lekin o'zi yeyilmaydi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Ovqat yeyish xohishi.",
+    "a": ["ishtaha", "ishtaha!"]
+  },
+  {
+    "id": 97,
+    "q": "97. Nima har doim o'sadi, lekin hech qachon kichraymaydi?",
+    "image": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800",
+    "hint": "💡 Maslahat: Insonning yosh ko'rsatkichi.",
+    "a": ["inson yoshi", "yosh", "yoshi"]
+  },
+  {
+    "id": 98,
+    "q": "98. Nimani sotib olayotganda qora, ishlatganda qizil, tashlaganda kulrang bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Yoqilg'i sifatida ishlatiladigan mineral.",
+    "a": ["ko'mir", "komir"]
+  },
+  {
+    "id": 99,
+    "q": "99. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
+    "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800",
+    "hint": "💡 Maslahat: Tarozi yoki kema yakori bilan bog'liq.",
+    "a": ["tarozi", "tarozi pallasi", "kema yakori"]
+  },
+  {
+    "id": 100,
+    "q": "100. Siz poyga o'yinida 2-o'rindagi ishtirokchini quvib o'tdingiz. Hozir nechanchi o'rindasiz?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Ikkinchi odamning o'rnini egallaysiz.",
+    "a": ["2-o'rinda", "2", "ikkinchi o'rinda", "2-o'rin"]
+  }
+  {
+    "id": 101,
+    "q": "101. Poyga o'yinida oxirgi ishtirokchini quvib o'tsangiz, nechanchi o'ringa o'tasiz?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Oxirgi ishtirokchini quvib o'tib bo'ladimi?",
+    "a": ["iloji yo'q", "oxirgi odamni quvib bo'lmaydi", "mumkin emas"]
+  },
+  {
+    "id": 102,
+    "q": "102. Uyda 5 ta sham yonib turibdi. Shamol tegib 2 tasi o'chdi. Nechta sham qoldi?",
+    "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800",
+    "hint": "💡 Maslahat: O'chgan shamlargina erib ketmay saqlanib qoladi.",
+    "a": ["2 ta", "2", "2 ta sham"]
+  },
+  {
+    "id": 103,
+    "q": "103. Dunyoda eng uzoq masofani ko'ra oladigan narsa nima?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Yuzingizdagi ko'rish organi.",
+    "a": ["ko'z", "koz"]
+  },
+  {
+    "id": 104,
+    "q": "104. Qaysi oydan keyin aprel oyi keladi?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Bahorning birinchi oyi.",
+    "a": ["mart", "mart oyidan"]
+  },
+  {
+    "id": 105,
+    "q": "105. Nimani chap qo'l bilan ushlab bo'ladi, lekin o'ng qo'l bilan ushlab bo meydi?",
+    "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800",
+    "hint": "💡 Maslahat: O'ng qo'lingiz tirsagi.",
+    "a": ["o'ng tirsak", "o'ng tirsakni", "ong tirsak"]
+  },
+  {
+    "id": 106,
+    "q": "106. Qaysi hayvon suv ichmaydi, chunki suv ichsa o'lishi mumkin?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Avstraliyada yashaydigan kenga ko'rinishidagi kalamush simon hayvon.",
+    "a": ["kenguru kalamushi", "kalamush"]
+  },
+  {
+    "id": 107,
+    "q": "107. Xonada chiroq yo'q, lekin stolda ochiq kitob turibdi. Qanday qilib uni o'qish mumkin?",
+    "image": "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
+    "hint": "💡 Maslahat: Kunduzi derazadan tushayotgan nur yoki Brayl alifbosi.",
+    "a": ["kunduzi", "brayl alifbosi", "kunduzyorug'ida"]
+  },
+  {
+    "id": 108,
+    "q": "108. Bir odam 3-qavatdan sakradi va oyog'ini sindirdi. U 9-qavatdan sakrasa nechta oyog'ini sindiradi?",
+    "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+    "hint": "💡 Maslahat: Inson tanasida nechta oyoq bor?",
+    "a": ["2 ta", "2", "ikkkala oyog'ini"]
+  },
+  {
+    "id": 109,
+    "q": "109. Nima pishirilganda qattiqlashadi?",
+    "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+    "hint": "💡 Maslahat: Qaynayotgan suvda pishadigan mahsulot.",
+    "a": ["tuxum"]
+  },
+  {
+    "id": 110,
+    "q": "110. Barcha insonlar nima uchun ovqat yeyishadi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Ovqat stolda yoki idishda turgan joyi.",
+    "a": ["stolda turgani uchun", "idishda bo'lgani uchun", "och bo'lgani uchun"]
+  },
+  {
+    "id": 111,
+    "q": "111. Bitta chiziq tortib, uni kesmasdan yoki o'chirmasdan qanday qilib qisqartirish mumkin?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: Yoniga undan uzunroq chiziq chizish kerak.",
+    "a": ["yoniga uzunroq chiziq chizib", "uzunroq chiziq chizib"]
+  },
+  {
+    "id": 112,
+    "q": "112. Qaysi savolga 'Yo'q' deb javob berib bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
+    "hint": "💡 Maslahat: Siz tirikmisiz degan savol.",
+    "a": ["tirikmisiz", "siz tirikmisiz?", "eshingiz yopiqmi"]
+  },
+  {
+    "id": 113,
+    "q": "113. Yer ostida yashaydi, lekin o'simlik emas. U nima?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Krot (ko'rchuqur).",
+    "a": ["krot", "ko'rchuqur", "chuvalchang"]
+  },
+  {
+    "id": 114,
+    "q": "114. Qaysi daraxt barg chiqarmaydi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Qurigan yoki kaktus simon daraxt.",
+    "a": ["qurigan daraxt", "quriydigan daraxt", "qurigan"]
+  },
+  {
+    "id": 115,
+    "q": "115. Nima har doim oldinga harakat qiladi, lekin orqaga qaytmaydi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Vaqt oqimi.",
+    "a": ["vaqt"]
+  },
+  {
+    "id": 116,
+    "q": "116. Nimani syndicate qilmay turib yeb bo'lmaydi?",
+    "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+    "hint": "💡 Maslahat: Qobig'i barbod qilinishi kerak bo'lgan narsa.",
+    "a": ["tuxum", "yong'oq"]
+  },
+  {
+    "id": 117,
+    "q": "117. Poyezdning qaysi qismida tezlik sezilmaydi?",
+    "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+    "hint": "💡 Maslahat: Restoran yoki harakatlanmaydigan qismi.",
+    "a": ["restoran vagonida", "ichida"]
+  },
+  {
+    "id": 118,
+    "q": "118. O'zbekiston bayrog'ida nechta yulduz bor?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: Oylar soni bilan teng.",
+    "a": ["12 ta", "12", "o'n ikkita"]
+  },
+  {
+    "id": 119,
+    "q": "119. Qaysi hayvon o'z uyi bilan birga yuradi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Qoshi bor sekin yuradigan mavjudot.",
+    "a": ["shilliq qurt", "tasbaha", "shilliqshurt"]
+  },
+  {
+    "id": 120,
+    "q": "120. Qaysi xonada eshik ham, deraza ham yo'q?",
+    "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800",
+    "hint": "💡 Maslahat: Qazi yeyiladigan sabzavot/qo'ziqorin.",
+    "a": ["qo'ziqorin", "qozimqorin"]
+  },
+  {
+    "id": 121,
+    "q": "121. Nima yozda kiyinadi, qishda yechinadi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Barg tashlaydigan o'simlik.",
+    "a": ["daraxt", "daraxtlar"]
+  },
+  {
+    "id": 122,
+    "q": "122. Bitta o'rmonda nechta daraxt bor?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: O'rmon barglar va daraxtlardan iborat.",
+    "a": ["juda ko'p", "sanoqsiz", "ko'p"]
+  },
+  {
+    "id": 123,
+    "q": "123. Suv qachon toshga aylanadi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Muzlaganda.",
+    "a": ["muzlaganda", "muz bo'lganda"]
+  },
+  {
+    "id": 124,
+    "q": "124. Bir xonada 3 kishi bor edi. Biri chiqib ketdi, necha kishi qoldi?",
+    "image": "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800",
+    "hint": "💡 Maslahat: Oddiy ayirish amali.",
+    "a": ["2 kishi", "2", "ikki kishi"]
+  },
+  {
+    "id": 125,
+    "q": "125. Nimaning quloqlari bor, lekin eshitmaydi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Qozon ushlaydigan qismi.",
+    "a": ["qozon", "qozon qulog'i", "yostiq"]
+  },
+  {
+    "id": 126,
+    "q": "126. Quyosh qayerdan chiqadi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Dunyo tomonlaridan biri.",
+    "a": ["sharqdan", "sharq"]
+  },
+  {
+    "id": 127,
+    "q": "127. Qaysi hayvon sudralib yuradi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Ilon yoki kiyikmas.",
+    "a": ["ilon", "kaltakesak"]
+  },
+  {
+    "id": 128,
+    "q": "128. Inson tanasida nechta suyak bor?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Katta yoshli odamda 206 ta.",
+    "a": ["206 ta", "206", "206-ta"]
+  },
+  {
+    "id": 129,
+    "q": "129. Qaysi sabzavot ko'zni yoshlantiradi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: To'g'ralganda achishtiradigan o'simlik.",
+    "a": ["piyoz"]
+  },
+  {
+    "id": 130,
+    "q": "130. Dunyodagi eng baland tog' qaysi?",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
+    "hint": "💡 Maslahat: Everest (Jomolungma).",
+    "a": ["everest", "jomolungma"]
+  },
+  {
+    "id": 131,
+    "q": "131. Qaysi okean eng katta hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Tinch okeani.",
+    "a": ["tinch okeani", "tinch"]
+  },
+  {
+    "id": 132,
+    "q": "132. Kompyuterning miyasi deb nimaga aytiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Markaziy protsessor (CPU).",
+    "a": ["protsessor", "cpu"]
+  },
+  {
+    "id": 133,
+    "q": "133. Futbol o'yinida maydonda nechta o'yinchi bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800",
+    "hint": "💡 Maslahat: Har bir jamoada 11 tadan.",
+    "a": ["22 ta", "22", "22 kishi"]
+  },
+  {
+    "id": 134,
+    "q": "134. Qaysi planetada biz yashaymiz?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Ko'k planeta.",
+    "a": ["yer", "yer sayyorasi"]
+  },
+  {
+    "id": 135,
+    "q": "135. Yilning qaysi faslida qor yog'adi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Eng sovuq fasl.",
+    "a": ["qish", "qishda", "qish faslida"]
+  },
+  {
+    "id": 136,
+    "q": "136. Qaysi qush tunda ko'radi, kunduzi uxlaydi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Boyo'g'li.",
+    "a": ["boyo'g'li", "boyogli"]
+  },
+  {
+    "id": 137,
+    "q": "137. Suvning kimyoviy formulasi qanday?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: H va O elementlari.",
+    "a": ["h2o", "h2o"]
+  },
+  {
+    "id": 138,
+    "q": "138. Eng kichik musiqiy nota qaysi?",
+    "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800",
+    "hint": "💡 Maslahat: Do re mi fa sol la si.",
+    "a": ["do", "si"]
+  },
+  {
+    "id": 139,
+    "q": "139. Qaysi hayvon 'sahro kemasi' deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: O'rkachli hayvon.",
+    "a": ["tuya", "tuya hayvoni"]
+  },
+  {
+    "id": 140,
+    "q": "140. Non tayyorlash uchun eng asosiy xomashyo nima?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Bug'doydan olinadigan kukunsimon mahsulot.",
+    "a": ["un", "bug'doy uni"]
+  },
+  {
+    "id": 141,
+    "q": "141. Nima o'sadi, lekin joni yo'q?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Soch va tirnoqlar.",
+    "a": ["soch", "tirnoq"]
+  },
+  {
+    "id": 142,
+    "q": "142. Bir yilda nechta kun bor?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Odatdagi yilda 365 kun.",
+    "a": ["365", "365 kun", "366"]
+  },
+  {
+    "id": 143,
+    "q": "143. Kamalakda nechta rang bor?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: 7 ta asosiy rang.",
+    "a": ["7 ta", "7", "yettita"]
+  },
+  {
+    "id": 144,
+    "q": "144. Qaysi faslda daraxtlar kurtak yoazdi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Bahor fasli.",
+    "a": ["bahor", "bahorda", "bahor faslida"]
+  },
+  {
+    "id": 145,
+    "q": "145. O'zbekiston Respublikasi mustaqillik kuni qachon?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: 1-sentyabr.",
+    "a": ["1-sentyabr", "1 sentyabr", "1-sentyabrda"]
+  },
+  {
+    "id": 146,
+    "q": "146. Qaysi meva vitamin C ga eng boy hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Limon yoki apelsin.",
+    "a": ["limon", "nartursh", "apelsin"]
+  },
+  {
+    "id": 147,
+    "q": "147. Qaysi soatda mil yo'q?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Elektron yoki qum soat.",
+    "a": ["elektron soat", "qum soat", "raqamli soat"]
+  },
+  {
+    "id": 148,
+    "q": "148. Nima doim pastga qaraydi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: O'simlik ildizi.",
+    "a": ["ildiz", "o'simlik ildizi"]
+  },
+  {
+    "id": 149,
+    "q": "149. Telefonda kim bilan gaplashasiz?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Narigi tarafdagi suhbatdash.",
+    "a": ["suhbatdosh", "odam bilan", "inson"]
+  },
+  {
+    "id": 150,
+    "q": "150. Quyosh tizimidagi eng katta planeta qaysi?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Yupiter.",
+    "a": ["yupiter", "yupiter sayyorasi"]
+  }
+  {
+    "id": 151,
+    "q": "151. Dunyodagi eng mitti qush qaysi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Kolibri qushi.",
+    "a": ["kolibri", "kolibri qushi"]
+  },
+  {
+    "id": 152,
+    "q": "152. Qaysi hayvon sudralib yurib, tishini har yili yangilaydi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Suvda va quruqlikda yashaydigan yirtqich emizikli.",
+    "a": ["timsah", "krokodil"]
+  },
+  {
+    "id": 153,
+    "q": "153. Yer shari nechta qit'adan iborat?",
+    "image": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800",
+    "hint": "💡 Maslahat: 6 ta asosiy qit'a.",
+    "a": ["6 ta", "6", "oltta"]
+  },
+  {
+    "id": 154,
+    "q": "154. Quyosh tizimida nechta planeta bor?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: 8 ta asosiy planeta.",
+    "a": ["8 ta", "8", "sakkizta"]
+  },
+  {
+    "id": 155,
+    "q": "155. Qaysi metall xona haroratida suyuq holatda bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Termometrlarda ishlatiladigan metall.",
+    "a": ["simob"]
+  },
+  {
+    "id": 156,
+    "q": "156. Inson organizmida necha litr qon bor?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: O'rtacha 5 litr atrofida.",
+    "a": ["5 litr", "5-6 litr", "5 litr atrofida"]
+  },
+  {
+    "id": 157,
+    "q": "157. Qaysi hayvon eng uzoq umr ko'radi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Suv toshbaqasi yoki Grenlandiya akulasi.",
+    "a": ["toshbaqa", "akula", "grenlandiya akulasi"]
+  },
+  {
+    "id": 158,
+    "q": "158. Bitta haftada nechta soat bor?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: 7 kun x 24 soat.",
+    "a": ["168", "168 soat"]
+  },
+  {
+    "id": 159,
+    "q": "159. Qaysi qit'ada muzliklar eng ko'p joylashgan?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Antarktida.",
+    "a": ["antarktida", "antarktida qit'asi"]
+  },
+  {
+    "id": 160,
+    "q": "160. Shamolning yo'nalishini ko'rsatadigan asbob nima deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=800",
+    "hint": "💡 Maslahat: Flyuger.",
+    "a": ["flyuger", "flyugerk"]
+  },
+  {
+    "id": 161,
+    "q": "161. Qaysi mevaning urug'i tashqarisida bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Qulupnay.",
+    "a": ["qulupnay", "klubnika"]
+  },
+  {
+    "id": 162,
+    "q": "162. Shaharda yashaydi, lekin uyi yo'q. U nima?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Ko'cha yoki daydi hayvon.",
+    "a": ["ko'cha", "daydi hayvon"]
+  },
+  {
+    "id": 163,
+    "q": "163. Yozda issiq, qishda sovuq bo'ladigan joy qayer?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Dala yoki ochiq havo.",
+    "a": ["tashqari", "ko'cha", "ochiq havo"]
+  },
+  {
+    "id": 164,
+    "q": "164. Kompyuterda ma'lumotlarni saqlash qurilmasi nima deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Qattiq disk yoki SSD.",
+    "a": ["qattiq disk", "ssd", "xotira", "xard disk"]
+  },
+  {
+    "id": 165,
+    "q": "165. Qaysi hayvon Tik-Tok yoki videolarda ko'p tarqalgan dangasa jonzot?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Leniveds (dangasa).",
+    "a": ["dangasa", "leniveds"]
+  },
+  {
+    "id": 166,
+    "q": "166. Qaysi sport turida to'pni qo'l bilan ushlash mumkin emas (darvozabondan tashqari)?",
+    "image": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800",
+    "hint": "💡 Maslahat: Futbol.",
+    "a": ["futbol", "futbol o'yinida"]
+  },
+  {
+    "id": 167,
+    "q": "167. Qaysi hayvon arining asalini o'g'irlab yeydi?",
+    "image": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=800",
+    "hint": "💡 Maslahat: O'rmon xo'jayini Ayiq.",
+    "a": ["ayiq", "ayiqlar"]
+  },
+  {
+    "id": 168,
+    "q": "168. Alisher Navoiy qaysi asr buyuk shoiri?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: XV asr (15-asr).",
+    "a": ["15-asr", "15 asr", "xv asr"]
+  },
+  {
+    "id": 169,
+    "q": "169. Dunyodagi eng chuqur ko'l qaysi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Baykal ko'li.",
+    "a": ["baykal", "baykal ko'li"]
+  },
+  {
+    "id": 170,
+    "q": "170. Nima havoda uchadi, lekin qanoti yo'q?",
+    "image": "https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=800",
+    "hint": "💡 Maslahat: Bulut yoki chang.",
+    "a": ["bulut", "chang", "tutun"]
+  },
+  {
+    "id": 171,
+    "q": "171. Harf va raqamlar bilan yoziladigan kod nima deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Parol yoki kod.",
+    "a": ["parol", "kod"]
+  },
+  {
+    "id": 172,
+    "q": "172. Samolyotni boshqaradigan shaxs kim?",
+    "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+    "hint": "💡 Maslahat: Uchuvchi (pilot).",
+    "a": ["uchuvchi", "pilot"]
+  },
+  {
+    "id": 173,
+    "q": "173. Avtomobilga yoqilg'i quyiladigan joy nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Zapravka (AQS).",
+    "a": ["zapravka", "aqs", "yoqilg'i quyish shoxobchasi"]
+  },
+  {
+    "id": 174,
+    "q": "174. Har doim oq, lekin iflos bo'lsa qorayadi. U nima?",
+    "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800",
+    "hint": "💡 Maslahat: Doska (yoki qor).",
+    "a": ["qor", "doska"]
+  },
+  {
+    "id": 175,
+    "q": "175. Qaysi o'simlikdan eng ko meva va yog' olinadi?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Zaytun yoki kungaboqar.",
+    "a": ["zaytun", "kungaboqar"]
+  },
+  {
+    "id": 176,
+    "q": "176. Qaysi hayvon sut emizuvchi bo'lsada, tuxum qo'yadi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: O'rdakburun (Utkonos).",
+    "a": ["o'rdakburun", "utkonos", "yexidna"]
+  },
+  {
+    "id": 177,
+    "q": "177. Bir sutkada nechta minut bor?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: 24 x 60 minut.",
+    "a": ["1440", "1440 minut", "1440 daqiqa"]
+  },
+  {
+    "id": 178,
+    "q": "178. Elektr tokini o'tkazmaydigan material nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Izolyator (dielektrik).",
+    "a": ["izolyator", "dielektrik"]
+  },
+  {
+    "id": 179,
+    "q": "179. Insonning qaysi organi hech qachon o'smaydi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Ko'z qorachig'i / ko meva.",
+    "a": ["ko'z", "ko'z qorachig'i"]
+  },
+  {
+    "id": 180,
+    "q": "180. Qaysi harf O'zbek alifbosida unli hisoblanmaydi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: Undosh harflar.",
+    "a": ["b", "v", "g", "d", "undosh harflar"]
+  },
+  {
+    "id": 181,
+    "q": "181. Nima yerdan chiqadi, leking suvda eriydi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Tuz yoki shakar.",
+    "a": ["tuz", "shakar"]
+  },
+  {
+    "id": 182,
+    "q": "182. Dunyodagi eng tez yuguradigan quruqlik hayvoni qaysi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Gepard.",
+    "a": ["gepard"]
+  },
+  {
+    "id": 183,
+    "q": "183. Qaysi xitoy devori dunyoning mo'jizalaridan biri?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Buyuk Xitoy devori.",
+    "a": ["buyuk xitoy devori", "xitoy devori"]
+  },
+  {
+    "id": 184,
+    "q": "184. Inson tanasidagi eng katta organ qaysi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Teri.",
+    "a": ["teri", "inson terisi"]
+  },
+  {
+    "id": 185,
+    "q": "185. Nechta shaxmat donasi (fiqurasi) bilan o'yin boshlanadi?",
+    "image": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800",
+    "hint": "💡 Maslahat: Jami 32 ta dona.",
+    "a": ["32 ta", "32", "32 dona"]
+  },
+  {
+    "id": 186,
+    "q": "186. Dunyodagi eng uzun daryo qaysi?",
+    "image": "https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?w=800",
+    "hint": "💡 Maslahat: Nil daryosi (yoki Amazonka).",
+    "a": ["nil", "nil daryosi", "amazonka"]
+  },
+  {
+    "id": 187,
+    "q": "187. Kompyuter sichqonchasining nechta asosiy tugmasi bor?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Chap va o'ng tugmalar (2 ta).",
+    "a": ["2 ta", "2", "ikkita"]
+  },
+  {
+    "id": 188,
+    "q": "188. Muz ko'p bo'lgan qutbda qanday ayiqlar yashaydi?",
+    "image": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=800",
+    "hint": "💡 Maslahat: Oq ayiqlar.",
+    "a": ["oq ayiq", "oq ayiqlar"]
+  },
+  {
+    "id": 189,
+    "q": "189. Telefonga ilova yuklab olinadigan Android platformasidagi do'kon nima deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Google Play Store.",
+    "a": ["play market", "google play", "play store"]
+  },
+  {
+    "id": 190,
+    "q": "190. Quyosh chiqishidan oldingi vaqt nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Saharlik yoki tong.",
+    "a": ["tong", "sahar", "saharlik"]
+  },
+  {
+    "id": 191,
+    "q": "191. Internet brauzerlariga misol keltiring?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Google Chrome, Opera.",
+    "a": ["chrome", "google chrome", "opera"]
+  },
+  {
+    "id": 192,
+    "q": "192. Suvning muzlash harorati necha daraja?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: 0 daraja Celsiy.",
+    "a": ["0 daraja", "0", "0 gradus"]
+  },
+  {
+    "id": 193,
+    "q": "193. Suvning qaynash harorati necha daraja?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: 100 daraja Celsiy.",
+    "a": ["100 daraja", "100", "100 gradus"]
+  },
+  {
+    "id": 194,
+    "q": "194. Oy Yer atrofida to'liq bir marta aylanishi uchun qancha vaqt ketadi?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Taxminan 27-28 kun (1 oy).",
+    "a": ["1 oy", "27 kun", "28 kun", "bir oy"]
+  },
+  {
+    "id": 195,
+    "q": "195. Qaysi davlat piramidalar o'lkasi deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Misr.",
+    "a": ["misr", "egipet"]
+  },
+  {
+    "id": 196,
+    "q": "196. Qaysi meva suvda cho'kmaydi?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Olma (tarkibida 25% havo bor).",
+    "a": ["olma"]
+  },
+  {
+    "id": 197,
+    "q": "197. Qaysi organ tanamizdagi qonni haydab beradi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Yurak.",
+    "a": ["yurak"]
+  },
+  {
+    "id": 198,
+    "q": "198. Dunyodagi eng baland bino qaysi?",
+    "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800",
+    "hint": "💡 Maslahat: Dubaydagi Burj Xalifa.",
+    "a": ["burj xalifa", "burj khalifa"]
+  },
+  {
+    "id": 199,
+    "q": "199. Qaysi qush orqaga qarab ucha oladi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Mitti Kolibri qushi.",
+    "a": ["kolibri", "kolibri qushi"]
+  },
+  {
+    "id": 200,
+    "q": "200. Bitta daqiqada nechta soniya bor?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: 60 soniya.",
+    "a": ["60", "60 soniya", "60 sekund"]
+  }
+  {
+    "id": 201,
+    "q": "201. Qaysi hayvon eng baland bo'yli hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Bo'yni juda uzun jonivor.",
+    "a": ["jirafa", "jiraf"]
+  },
+  {
+    "id": 202,
+    "q": "202. Dunyodagi eng katta sut emizuvchi hayvon qaysi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Ummon va okeanlarda yashaydi.",
+    "a": ["ko'k kit", "kit", "kurt kit"]
+  },
+  {
+    "id": 203,
+    "q": "203. Qaysi davlat kunchiqar yurt deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800",
+    "hint": "💡 Maslahat: Osiyodagi orol-davlat.",
+    "a": ["yaponiya", "japonya"]
+  },
+  {
+    "id": 204,
+    "q": "204. Telefonga zaryad beradigan qurilma nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Zaryadnik.",
+    "a": ["zaryadnik", "zaryadlovchi", "zaryad qurilmasi"]
+  },
+  {
+    "id": 205,
+    "q": "205. Inson tanasida kislorod tashuvchi qon hujayralari nima deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Qizil qon tanachalari.",
+    "a": ["eritrotsitlar", "eritrotsit", "qizil qon tanachalari"]
+  },
+  {
+    "id": 206,
+    "q": "206. Kompyuter ekranidagi tasvir aniqligi birligi nima?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Piksel.",
+    "a": ["piksel", "pixel"]
+  },
+  {
+    "id": 207,
+    "q": "207. Qaysi sport turida 'shahmat toji' uchun bellashiladi?",
+    "image": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800",
+    "hint": "💡 Maslahat: Taxta ustidagi mantiqiy o'yin.",
+    "a": ["shahmat", "shaxmat"]
+  },
+  {
+    "id": 208,
+    "q": "208. Qaysi qit'a 'eng issiq qit'a' hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Sahara cho'li joylashgan qit'a.",
+    "a": ["afrika", "afrika qit'asi"]
+  },
+  {
+    "id": 209,
+    "q": "209. Avtomobilning burilishini ko'rsatadigan chiroq nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Povorotnik.",
+    "a": ["povorotnik", "burilish chirog'i"]
+  },
+  {
+    "id": 210,
+    "q": "210. Qaysi hayvon o'z tilini chiqara olmaydi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Suvda va quruqlikda yashaydigan yirtqich.",
+    "a": ["timsah", "krokodil"]
+  },
+  {
+    "id": 211,
+    "q": "211. Yerning tabiiy yo'ldoshi nima?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Tunda osmonda porlaydi.",
+    "a": ["oy", "oy sayyorasi"]
+  },
+  {
+    "id": 212,
+    "q": "212. O'zbekistonning poytaxti qaysi shahar?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: Markaziy Osiyodagi yirik megapolis.",
+    "a": ["toshkent", "toshkent shahri"]
+  },
+  {
+    "id": 213,
+    "q": "213. Qaysi modda tabiatda 3 xil holatda (suyuq, qattiq, gaz) uchraydi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Hayot manbai.",
+    "a": ["suv"]
+  },
+  {
+    "id": 214,
+    "q": "214. Kompyuter dasturlarini yozadigan mutaxassis kim?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Kod yozuvchi mutaxassis.",
+    "a": ["dasturchi", "programmist"]
+  },
+  {
+    "id": 215,
+    "q": "215. Qaysi qush eng tez yuguradi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Ucha olmaydigan katta qush.",
+    "a": ["tuyaqush", "tuya qush"]
+  },
+  {
+    "id": 216,
+    "q": "216. Nima doim keladi, lekin hech qachon yetib kelmaydi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Ertangi kun.",
+    "a": ["ertaga", "ertangi kun"]
+  },
+  {
+    "id": 217,
+    "q": "217. Qaysi geometrik shaklning burchaklari yo'q?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Doira yoki aylana.",
+    "a": ["doira", "aylana"]
+  },
+  {
+    "id": 218,
+    "q": "218. Inson miyasining asosiy vazifasi nima?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: O'ylash va boshqarish.",
+    "a": ["fikrlash", "boshqarish", "o'ylash"]
+  },
+  {
+    "id": 219,
+    "q": "219. Qaysi hayvon suv tagida uxlay oladi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Delphin yoki kit.",
+    "a": ["delfin", "kit"]
+  },
+  {
+    "id": 220,
+    "q": "220. Eng qattiq tabiat materiali nima?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Olmos.",
+    "a": ["olmos", "almaz"]
+  },
+  {
+    "id": 221,
+    "q": "221. Dunyodagi eng katta orol qaysi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Grenlandiya.",
+    "a": ["grenlandiya", "grenlandiya oroli"]
+  },
+  {
+    "id": 222,
+    "q": "222. Avtomobilda xavfsizlikni ta'minlaydigan Tasma nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Xavfsizlik kamari.",
+    "a": ["xavfsizlik kamari", "kamar"]
+  },
+  {
+    "id": 223,
+    "q": "223. Musiqada nechta asosiy nota bor?",
+    "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800",
+    "hint": "💡 Maslahat: Do, Re, Mi...",
+    "a": ["7 ta", "7", "yettita"]
+  },
+  {
+    "id": 224,
+    "q": "224. Qaysi gaz inson nafas olishi uchun zarur?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Kislorod.",
+    "a": ["kislorod", "o2"]
+  },
+  {
+    "id": 225,
+    "q": "225. O'simliklar quyosh nuridan foydalanib oziq modda hosil qilish jarayoni nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Fotosintez.",
+    "a": ["fotosintez"]
+  },
+  {
+    "id": 226,
+    "q": "226. Dunyodagi eng ko'p aholiga ega davlat qaysi?",
+    "image": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800",
+    "hint": "💡 Maslahat: Hindiston (yoki Xitoy).",
+    "a": ["hindiston", "xitoy"]
+  },
+  {
+    "id": 227,
+    "q": "227. Kompyuter xotirasi sig'imi birligi (eng kichigi) nima?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Bit yoki Bayt.",
+    "a": ["bit", "bayt"]
+  },
+  {
+    "id": 228,
+    "q": "228. Qaysi hayvonning sutidan qimiz tayyorlanadi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Ot (biya).",
+    "a": ["ot", "biya"]
+  },
+  {
+    "id": 229,
+    "q": "229. Yerdan eng yaqin yulduz qaysi?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Kunduzi charaglab turadi.",
+    "a": ["quyosh"]
+  },
+  {
+    "id": 230,
+    "q": "230. Qaysi hayvonning dumi kesilsa, qayta o'sib chiqadi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Kaltakesak.",
+    "a": ["kaltakesak"]
+  },
+  {
+    "id": 231,
+    "q": "231. Qaysi faslda kechalar eng uzun bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Qish fasli.",
+    "a": ["qish", "qishda", "qish faslida"]
+  },
+  {
+    "id": 232,
+    "q": "232. Telefon tarmog'isiz muloqot qiladigan kichik radiostansiya nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Ratsiya.",
+    "a": ["ratsiya", "rotiya"]
+  },
+  {
+    "id": 233,
+    "q": "233. O'zbekiston milliy valyutasi nima?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: So'm.",
+    "a": ["so'm", "som"]
+  },
+  {
+    "id": 234,
+    "q": "234. Qaysi meva suvda 80% dan ortiq suvdan iborat?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Tarvuz.",
+    "a": ["tarvuz"]
+  },
+  {
+    "id": 235,
+    "q": "235. Yilning nechanchi oyida 28 yoki 29 kun bor?",
+    "image": "https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800",
+    "hint": "💡 Maslahat: Fevral.",
+    "a": ["fevral", "fevral oyida"]
+  },
+  {
+    "id": 236,
+    "q": "236. Qaysi sport turida halqalar (ring) ustida kurashiladi?",
+    "image": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800",
+    "hint": "💡 Maslahat: Boks.",
+    "a": ["boks"]
+  },
+  {
+    "id": 237,
+    "q": "237. Kompyuter klaviaturasidagi eng katta tugma qaysi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Probel (Spacebar).",
+    "a": ["probel", "space", "spacebar"]
+  },
+  {
+    "id": 238,
+    "q": "238. Inson tanasida eng kuchli muskul (mushak) qayerda joylashgan?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Jag' yoki til mushagi.",
+    "a": ["jag'", "til", "jag' mushagi"]
+  },
+  {
+    "id": 239,
+    "q": "239. Dunyodagi eng katta cho'l qaysi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Sahara (yoki Antarktida muz cho'li).",
+    "a": ["sahara", "antarktida"]
+  },
+  {
+    "id": 240,
+    "q": "240. Samolyot havoga ko'tarilishi uchun nima kerak?",
+    "image": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+    "hint": "💡 Maslahat: Tezlik va havo oqimi (qanot kuchi).",
+    "a": ["tezlik", "havo oqimi", "yoqilg'i"]
+  },
+  {
+    "id": 241,
+    "q": "241. Qaysi jonivor o'z tanasining og'irligidan 50 baravar ko'p yuk ko'tara oladi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Chumoli.",
+    "a": ["chumoli"]
+  },
+  {
+    "id": 242,
+    "q": "242. Qaysi davlat hududi bo'yicha dunyoda eng katta?",
+    "image": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800",
+    "hint": "💡 Maslahat: Rossiya.",
+    "a": ["rossiya", "rossiya federatsiyasi"]
+  },
+  {
+    "id": 243,
+    "q": "243. Insonning qaysi segi organida barmoq izlari kabi unikal naqshlar bor?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Ko'z rangli pardasi (iris) yoki barmoqlar.",
+    "a": ["ko'z", "barmoq", "ko'z pardasi"]
+  },
+  {
+    "id": 244,
+    "q": "244. Haroratni o'lchaydigan asbob nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+    "hint": "💡 Maslahat: Termometr.",
+    "a": ["termometr", "gradusnik"]
+  },
+  {
+    "id": 245,
+    "q": "245. O'zbekiston gerbida qaysi afsonaviy qush tasvirlangan?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: Humo qushi.",
+    "a": ["humo", "humo qushi"]
+  },
+  {
+    "id": 246,
+    "q": "246. Qaysi hayvonning yuragi uning boshida joylashgan?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Krevetka (krevetka saratoni).",
+    "a": ["krevetka"]
+  },
+  {
+    "id": 247,
+    "q": "247. Quyosh sistemasidagi qaysi planetada ulkan xalqalar (uzuklar) bor?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Saturn.",
+    "a": ["saturn", "saturn sayyorasi"]
+  },
+  {
+    "id": 248,
+    "q": "248. Bir kilogrammda nechta gramm bor?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: 1000 gramm.",
+    "a": ["1000", "1000 g", "1000 gramm"]
+  },
+  {
+    "id": 249,
+    "q": "249. Qaysi hayvon 'o'rmon shifokori' deyiladi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Qizilishton qushi.",
+    "a": ["qizilishton"]
+  },
+  {
+    "id": 250,
+    "q": "250. Internetdagi web-saytlarning bosh sahifasi nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Bosh sahifa (Home page).",
+    "a": ["bosh sahifa", "home page", "main page"]
+  }
+  {
+    "id": 251,
+    "q": "251. Qaysi o'simlikdan shakar olinadi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Shakarqamish yoki lavlagi.",
+    "a": ["lavlagi", "shakarqamish", "shakar lavlagi"]
+  },
+  {
+    "id": 252,
+    "q": "252. Dunyodagi eng kichik okean qaysi?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Shimoliy Muz okeani.",
+    "a": ["shimoliy muz okeani", "muz okeani"]
+  },
+  {
+    "id": 253,
+    "q": "253. Shaxmat taxtasida nechta katak bor?",
+    "image": "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800",
+    "hint": "💡 Maslahat: 8x8 kataklar.",
+    "a": ["64 ta", "64", "64 katak"]
+  },
+  {
+    "id": 254,
+    "q": "254. Qaysi daryo dunyoda eng sersuv hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?w=800",
+    "hint": "💡 Maslahat: Janubiy Amerikadagi daryo.",
+    "a": ["amazonka", "amazonka daryosi"]
+  },
+  {
+    "id": 255,
+    "q": "255. Inson tanasida nechta qovurg'a bor?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: 12 juft (24 ta).",
+    "a": ["24 ta", "24", "12 juft"]
+  },
+  {
+    "id": 256,
+    "q": "256. Kompyuterda o'chirilgan fayllar qayerga tushadi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Korzina (Recycle Bin).",
+    "a": ["korzina", "recycle bin", "chiqindi qutisi"]
+  },
+  {
+    "id": 257,
+    "q": "257. Qaysi meva limon kabi nordon, lekin yashil rangda bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    "hint": "💡 Maslahat: Laym.",
+    "a": ["laym"]
+  },
+  {
+    "id": 258,
+    "q": "258. Qaysi jonivor tik turib uxlay oladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Ot yoki fil.",
+    "a": ["ot", "fil"]
+  },
+  {
+    "id": 259,
+    "q": "259. O'zbekistonda eng katta viloyat qaysi?",
+    "image": "https://images.unsplash.com/photo-1579273166152-d725a4e2b755?w=800",
+    "hint": "💡 Maslahat: Qoraqalpog'iston Respublikasi / Navoiy viloyati.",
+    "a": ["navoiy", "qoraqalpog'iston", "navoiy viloyati"]
+  },
+  {
+    "id": 260,
+    "q": "260. Atmosferadagi eng ko'p tarqalgan gaz qaysi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Azot (78%).",
+    "a": ["azot", "azot gazi"]
+  },
+  {
+    "id": 261,
+    "q": "261. Telefon ekranini chizilishdan himoya qiluvchi oyna nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Zashchitnik (Zashchita oynasi).",
+    "a": ["zashchitnik", "himoya oynasi", "steklo"]
+  },
+  {
+    "id": 262,
+    "q": "262. Avtomobil qancha masofa bosib o'tganini o'lchaydigan asbob nima?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Odometer (Spidometr qismida).",
+    "a": ["odometr", "spidometr"]
+  },
+  {
+    "id": 263,
+    "q": "263. Qaysi hayvonning homiladorlik davri eng uzun (taxminan 22 oy)?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Fil.",
+    "a": ["fil"]
+  },
+  {
+    "id": 264,
+    "q": "264. Qaysi sport turida 'strike' va 'spare' tushunchalari bor?",
+    "image": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800",
+    "hint": "💡 Maslahat: Bouling.",
+    "a": ["bouling", "bowling"]
+  },
+  {
+    "id": 265,
+    "q": "265. Qaysi planetaning atrofida eng ko'p yo'ldoshlar bor?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: Saturn yoki Yupiter.",
+    "a": ["saturn", "yupiter"]
+  },
+  {
+    "id": 266,
+    "q": "266. Bir metrda nechta santimetr bor?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: 100 sm.",
+    "a": ["100", "100 sm", "100 santimetr"]
+  },
+  {
+    "id": 267,
+    "q": "267. Qaysi hayvon suv ichmaydi, balki suvni terisi orqali shimib oladi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Qurbaqa.",
+    "a": ["qurbaqa"]
+  },
+  {
+    "id": 268,
+    "q": "268. Internetda ma'lumot qidiruvchi eng mashhur tizim qaysi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Google.",
+    "a": ["google", "gugl"]
+  },
+  {
+    "id": 269,
+    "q": "269. Dunyodagi eng baland sharshara qaysi?",
+    "image": "https://images.unsplash.com/photo-1437482078695-73f5ca6c96e2?w=800",
+    "hint": "💡 Maslahat: Anxel (Angel).",
+    "a": ["anxel", "angel"]
+  },
+  {
+    "id": 270,
+    "q": "270. Inson tanasida nechta sezgi a'zosi bor?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Ko'rish, eshitish, hid bilish, ta'm bilish, paypaslash (5 ta).",
+    "a": ["5 ta", "5", "beshta"]
+  },
+  {
+    "id": 271,
+    "q": "271. Qaysi turdagi xotira kompyuter o'chirilganda tozalanib ketadi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Operativ xotira (RAM).",
+    "a": ["ram", "operativ xotira", "operativka"]
+  },
+  {
+    "id": 272,
+    "q": "272. Yer yuzidagi eng sovuq joy qayer?",
+    "image": "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=800",
+    "hint": "💡 Maslahat: Antarktida.",
+    "a": ["antarktida"]
+  },
+  {
+    "id": 273,
+    "q": "273. Qaysi sabzavot tuproq ostida o'sadi va to's-to's tayyorlanadi?",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800",
+    "hint": "💡 Maslahat: Kartoshka.",
+    "a": ["kartoshka"]
+  },
+  {
+    "id": 274,
+    "q": "274. Inson tanasidagi eng uzun nerv qaysi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Quyimchak (Sedalishniy) nervi.",
+    "a": ["sedalishniy", "quyimchak nervi"]
+  },
+  {
+    "id": 275,
+    "q": "275. Qaysi davlat 'Lola mamlakati' deb ataladi?",
+    "image": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800",
+    "hint": "💡 Maslahat: Niderlandiya (Gollandiya).",
+    "a": ["niderlandiya", "gollandiya"]
+  },
+  {
+    "id": 276,
+    "q": "276. Dasturlashda xatoliklarni topish va tuzatish jarayoni nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Debagging (Debugging).",
+    "a": ["debugging", "debagging", "otladka"]
+  },
+  {
+    "id": 277,
+    "q": "277. Qaysi qush tuxum bosmaydi, balki boshqa qushlar iniga qo'yib ketadi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Kaklik emas, Kakku.",
+    "a": ["kakku", "kakku qushi"]
+  },
+  {
+    "id": 278,
+    "q": "278. Qaysi mato tabiiy ravishda ipak qurti orqali olinadi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: Ipak.",
+    "a": ["ipak", "sholk"]
+  },
+  {
+    "id": 279,
+    "q": "279. Qaysi organ suyuqlikni filtrlash va siydik hosil qilish uchun javobgar?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Buyrak.",
+    "a": ["buyrak", "buyraklar"]
+  },
+  {
+    "id": 280,
+    "q": "280. Dunyodagi eng katta dengiz qaysi?",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    "hint": "💡 Maslahat: Filippin dengizi (yoki O'rtayer dengizi).",
+    "a": ["filippin dengizi", "o'rtayer dengizi"]
+  },
+  {
+    "id": 281,
+    "q": "281. Kompyuter tarmog'ida ma'lumotlarni uzatish tezligi nimada o'lchanadi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Mbit/s (Megabit sekundiga).",
+    "a": ["mbit/s", "megabit", "kb/s"]
+  },
+  {
+    "id": 282,
+    "q": "282. Qaysi faslda kunlar eng uzun bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800",
+    "hint": "💡 Maslahat: Yoz fasli.",
+    "a": ["yoz", "yozda", "yoz faslida"]
+  },
+  {
+    "id": 283,
+    "q": "283. Avtomobilda tormoz bosilganda orqada yonadigan chiroqlar qanday rangda?",
+    "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
+    "hint": "💡 Maslahat: Qizil rang.",
+    "a": ["qizil", "qizil rangda"]
+  },
+  {
+    "id": 284,
+    "q": "284. Qaysi hayvon suv ichmasdan eng uzoq vaqt yashay oladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Kenguru kalamushi yoki tuya.",
+    "a": ["kenguru kalamushi", "tuya"]
+  },
+  {
+    "id": 285,
+    "q": "285. Inson tanasida ovqat hazm qilish qaysi organda boshlanadi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Og'iz bo'shlig'i.",
+    "a": ["og'iz", "og'iz bo'shlig'i"]
+  },
+  {
+    "id": 286,
+    "q": "286. Dunyodagi eng qimmatbaho va noyob metall qaysi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Rodiy yoki kaliforniy.",
+    "a": ["rodiy", "kaliforniy", "platina"]
+  },
+  {
+    "id": 287,
+    "q": "287. Telefonda Wi-Fi standarti nimani anglatadi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Simsiz internet (Wireless Fidelity).",
+    "a": ["simsiz internet", "wireless fidelity"]
+  },
+  {
+    "id": 288,
+    "q": "288. Qaysi qush soatiga 300 km dan ortiq tezlikda shung'iy oladi?",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
+    "hint": "💡 Maslahat: Sapsan lachin (Lochin).",
+    "a": ["sapsan", "lochin", "sapsan lochini"]
+  },
+  {
+    "id": 289,
+    "q": "289. Inson ko'zi sekundiga nechta kadrni ajrata oladi deb hisoblanadi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Taxminan 24-60 kadr.",
+    "a": ["24", "60", "24-60"]
+  },
+  {
+    "id": 290,
+    "q": "290. Qaysi qit'ada birorta ham cho'l yo'q?",
+    "image": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800",
+    "hint": "💡 Maslahat: Yevropa.",
+    "a": ["yevropa", "yevropa qit'asi"]
+  },
+  {
+    "id": 291,
+    "q": "291. Dasturlashda davriy takrorlanadigan kod bloki nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
+    "hint": "💡 Maslahat: Tsikl (Loop).",
+    "a": ["tsikl", "loop", "sikll"]
+  },
+  {
+    "id": 292,
+    "q": "292. Qaysi hayvonning suti pushti rangda bo'ladi?",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800",
+    "hint": "💡 Maslahat: Begemot (Gippopotam).",
+    "a": ["begemot", "gippopotam"]
+  },
+  {
+    "id": 293,
+    "q": "293. Dunyodagi eng qadimgi yozuv turi nima deyiladi?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: Muxrsimon / Mixxat yozuvi (Klinopis).",
+    "a": ["mixxat", "klinopis", "iyeroglif"]
+  },
+  {
+    "id": 294,
+    "q": "294. Qaysi a'zo qondagi shakarni tartibga solish uchun insulin ishlab chiqaradi?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Oshqozon osti bezi.",
+    "a": ["oshqozon osti bezi", "podjeludochnaya"]
+  },
+  {
+    "id": 295,
+    "q": "295. Dunyodagi eng tez poezdlar qaysi davlatda ishlaydi?",
+    "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+    "hint": "💡 Maslahat: Xitoy yoki Yaponiya (Maglev).",
+    "a": ["xitoy", "yaponiya"]
+  },
+  {
+    "id": 296,
+    "q": "296. Yer o'z o'qi atrofida to'liq bir marta aylanishi uchun qancha vaqt ketadi?",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+    "hint": "💡 Maslahat: 24 soat (1 kun).",
+    "a": ["24 soat", "1 kun", "bir kun"]
+  },
+  {
+    "id": 297,
+    "q": "297. Yuzaki o'lchov birligi bo'lgan 'gektar' nechta kvadrat metrga teng?",
+    "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+    "hint": "💡 Maslahat: 10 000 kv.m.",
+    "a": ["10000", "10 000", "10000 kv m"]
+  },
+  {
+    "id": 298,
+    "q": "298. Qaysi metall zanglamaydi?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Oltin yoki platina.",
+    "a": ["oltin", "platina"]
+  },
+  {
+    "id": 299,
+    "q": "299. Inson skeletidagi eng kichik suyak qayerda joylashgan?",
+    "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
+    "hint": "💡 Maslahat: Quloqda (Uzangi suyagi).",
+    "a": ["quloqda", "quloq", "uzangi suyagi"]
+  },
+  {
+    "id": 300,
+    "q": "300. Python dasturlash tilining ramzi qaysi hayvon?",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",
+    "hint": "💡 Maslahat: Ilon (Piton).",
+    "a": ["ilon", "piton", "python"]
+  }
 ]
 
 # --- KODGA QO'SHILADIGAN JAVOBNI TEKSHIRISH FUNKSIYASI ---
