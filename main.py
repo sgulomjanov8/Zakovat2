@@ -2,7 +2,6 @@ import os
 import asyncio
 import random
 import logging
-from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
 
@@ -26,8 +25,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
+# Telegram Bot Tokeni
+TOKEN = os.getenv("BOT_TOKEN", "8744991351:AAGVE82fuE3k910i-Xk-GG8_qGDgYzeWQOY")
 
 # Web Server (Render'da 24/7 ishlashi uchun)
 app = Flask('')
@@ -201,8 +200,7 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
                 parse_mode="HTML"
             )
     except Exception as e:
-        logger.error(f"Savol yuborishda xatolik (rasm xatosi bo'lishi mumkin): {e}")
-        # Agar rasm yuklanmasa, rasmsiz yuboramiz
+        logger.error(f"Savol yuborishda xatolik: {e}")
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
@@ -220,7 +218,6 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    # Telegram'dagi soat (loading) belgisini darhol yo'qotish uchun:
     await query.answer()
     
     try:
@@ -299,10 +296,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- ASOSIY ISHGA TUSHIRISH ---
 
 def main():
-    if not TOKEN:
-        logger.error("BOT_TOKEN topilmadi! Render Environment Variables yoki .env faylingizni tekshiring.")
-        return
-
     keep_alive()
     app_bot = Application.builder().token(TOKEN).build()
     
