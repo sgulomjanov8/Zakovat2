@@ -2113,8 +2113,8 @@ def normalize_text(text: str) -> str:
     if not text:
         return ""
     text = str(text).lower().strip()
-    text = re.sub(r"[‘`ʼ'ʹʻ]", "", text)
-    text = text.replace("oʻ", "o").replace("gʻ", "g").replace("o'", "o").replace("g'", "g")
+   text = re.sub(r"[^\w\s]", "", text)
+   text = text.replace("o‘", "o").replace("g‘", "g").replace("o'", "o").replace("g'", "g")
     return text.strip()
 
 def check_answer(user_answer: str, correct_answers: list) -> bool:
