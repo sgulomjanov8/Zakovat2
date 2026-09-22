@@ -15,25 +15,25 @@ from telegram.ext import (
     ContextTypes
 )
 
-# questions.py faylingizdan savollar va javobni tekshirish funksiyasi
+# Импорт вопросов и функции проверки из вашего questions.py
 from questions import LOGICAL_QUESTIONS, check_answer
 
-# Logging sozlamalari (Render loglarida xatolarni aniq ko'rish uchun)
+# Настройка логирования для отслеживания ошибок в консоли Render
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Telegram Bot Tokeni
+# Токен бота (берётся из переменных Render или используется текущий рабочий)
 TOKEN = os.getenv("BOT_TOKEN", "8744991351:AAGVE82fuE3k910i-Xk-GG8_qGDgYzeWQOY")
 
-# Web Server (Render'da 24/7 ishlashi uchun)
+# ----------------- FLASK WEB SERVER FOR RENDER -----------------
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "Bot faol ishlamoqda!"
+    return "Bot status: ONLINE"
 
 def run_flask():
     port = int(os.environ.get('PORT', 8080))
@@ -44,10 +44,10 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- MENYULAR ---
+# ----------------- КЛАВИАТУРЫ И МЕНЮ -----------------
 
 def get_class_keyboard():
-    """5-sinfdan 11-sinfgacha va Aralash menyusi"""
+    """Выбор класса (от 5 до 11) и вариант 'Aralash'"""
     keyboard = [
         [InlineKeyboardButton("5-sinf", callback_data="class_5"), InlineKeyboardButton("6-sinf", callback_data="class_6")],
         [InlineKeyboardButton("7-sinf", callback_data="class_7"), InlineKeyboardButton("8-sinf", callback_data="class_8")],
@@ -57,28 +57,29 @@ def get_class_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def get_count_keyboard():
-    """Savollar sonini tanlash menyusi"""
+    """Выбор количества вопросов"""
     keyboard = [
         [InlineKeyboardButton("3 ta savol", callback_data="count_3"), InlineKeyboardButton("5 ta savol", callback_data="count_5")],
         [InlineKeyboardButton("10 ta savol", callback_data="count_10"), InlineKeyboardButton("15 ta savol", callback_data="count_15")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# --- START BUYRUG'I ---
+# ----------------- ОБРАБОТКА /START -----------------
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Oldingi taymer bo'lsa to'xtatamiz
+    # Очищаем старые таймеры, если они были
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
     context.user_data.clear()
+    
     await update.message.reply_text(
         "👋 **Xush kelibsiz!** O'yinni boshlash uchun kerakli **sinfni** tanlang:",
         reply_markup=get_class_keyboard(),
         parse_mode="Markdown"
     )
 
-# --- TAYMER VA HINT (MASLAHAT) VAZIFASI ---
+# ----------------- ТАЙМЕР И ПОДСКАЗКА -----------------
 
 async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
     try:
@@ -87,11 +88,10 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             await asyncio.sleep(1)
             total_seconds -= 1
             
-            # Foydalanuvchi javob berib bo'lgan bo'lsa, taymer to'xtaydi
             if not context.user_data.get("is_answering", False):
                 return
 
-            # 80-soniya o'tganda (110 - 80 = 30s qolganda) 1 marta hint yuboriladi
+            # Отправка подсказки (hint) на 80-й секунде (когда остается <= 30 сек)
             if total_seconds <= 30 and not hint_sent:
                 hint_sent = True
                 q_data = context.user_data.get("current_q")
@@ -103,7 +103,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
                             parse_mode="HTML"
                         )
                     except Exception as e:
-                        logger.error(f"Hint yuborishda xatolik: {e}")
+                        logger.error(f"Ошибка при отправке подсказки: {e}")
             
             mins, secs = divmod(total_seconds, 60)
             time_str = f"{mins}:{secs:02d}"
@@ -119,7 +119,6 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             )
             
             try:
-                # Agar savol rasmli bo'lsa edit_message_caption, aks holda edit_message_text
                 if q_data.get("image"):
                     await context.bot.edit_message_caption(
                         chat_id=chat_id,
@@ -137,7 +136,6 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             except Exception:
                 pass
 
-        # Vaqt tugaganda
         if context.user_data.get("is_answering", False):
             context.user_data["is_answering"] = False
             await context.bot.send_message(
@@ -151,13 +149,12 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
     except asyncio.CancelledError:
         pass
 
-# --- SAVOL BERISH ---
+# ----------------- ОТПРАВКА СЛЕДУЮЩЕГО ВОПРОСА -----------------
 
 async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     q_index = context.user_data.get("q_index", 0)
     selected_questions = context.user_data.get("questions", [])
     
-    # O'yin yakunlansa
     if q_index >= len(selected_questions):
         score = context.user_data.get("score", 0)
         total = len(selected_questions)
@@ -184,7 +181,6 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         f"⏱ <b>Qolgan vaqt:</b> 1:50"
     )
     
-    # Savolni yuborish (rasm bormi yoki yo'q)
     try:
         if q_data.get("image"):
             msg = await context.bot.send_photo(
@@ -200,28 +196,26 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
                 parse_mode="HTML"
             )
     except Exception as e:
-        logger.error(f"Savol yuborishda xatolik: {e}")
+        logger.error(f"Ошибка отправки фото: {e}")
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
             parse_mode="HTML"
         )
     
-    # Oldingi taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqamiz
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
     task = asyncio.create_task(timer_task(context, chat_id, msg.message_id, 110))
     context.user_data["timer_task"] = task
 
-# --- TUGMA HODISALARI ---
+# ----------------- ОБРАБОТКА НАЖАТИЙ НА КНОПКИ -----------------
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
     try:
-        # 1. Sinf tanlanganda
         if query.data.startswith("class_"):
             selected_class = query.data.split("_")[1]
             context.user_data["selected_class"] = selected_class
@@ -233,14 +227,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown"
             )
             
-        # 2. Savollar soni tanlanganda
         elif query.data.startswith("count_"):
             count = int(query.data.split("_")[1])
             selected_class = context.user_data.get("selected_class", "all")
             
             all_q = LOGICAL_QUESTIONS.copy()
             
-            # Sinf bo'yicha filterlash
             if selected_class != "all":
                 filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
                 if filtered_q:
@@ -257,9 +249,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await ask_next_question(context, query.message.chat_id)
 
     except Exception as e:
-        logger.error(f"Tugma bosilganda xatolik: {e}")
+        logger.error(f"Ошибка в button_handler: {e}")
 
-# --- JAVOB TEKSHIRISH ---
+# ----------------- ПРОВЕРКА ОТВЕТА -----------------
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.user_data.get("is_answering", False):
@@ -273,11 +265,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     context.user_data["is_answering"] = False
     
-    # Taymerni to'xtatamiz
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
 
-    # check_answer orqali tekshirish
     is_correct = check_answer(user_text, current_q["a"])
     
     if is_correct:
@@ -293,18 +283,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["q_index"] = context.user_data.get("q_index", 0) + 1
     await ask_next_question(context, update.message.chat_id)
 
-# --- ASOSIY ISHGA TUSHIRISH ---
+# ----------------- ЗАПУСК БОТА -----------------
 
 def main():
+    # Запуск фонового веб-сервера
     keep_alive()
+    
+    # Сборка приложения Telegram
     app_bot = Application.builder().token(TOKEN).build()
     
+    # Регистрация хэндлеров
     app_bot.add_handler(CommandHandler("start", start_command))
     app_bot.add_handler(CallbackQueryHandler(button_handler))
     app_bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    print("Bot muvaffaqiyatli ishga tushdi!")
-    app_bot.run_polling()
+    logger.info("Bot uspeshno zapushen!")
+    
+    # drop_pending_updates=True удаляет подвисшие старые команды и сбрасывает вебхуки
+    app_bot.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
     main()
