@@ -2,7 +2,7 @@
 import re
 from difflib import SequenceMatcher
 
-LOGICAL_QUESTIONS = [
+LOGICAL_QUESTIONS= [ 
   {
     "id": 1,
     "q": "1. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
@@ -352,7 +352,7 @@ LOGICAL_QUESTIONS = [
     "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800",
     "hint": "💡 Maslahat: U kechalari uxlagan.",
     "a": ["kechasi uxlagan", "kechalari uxlagan", "tunda uxlagan"]
-  }
+  },
   {
     "id": 51,
     "q": "51. Mashina burilayotganda qaysi g'ildirak aylanmaydi?",
@@ -702,7 +702,7 @@ LOGICAL_QUESTIONS = [
     "image": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=800",
     "hint": "💡 Maslahat: Ikkinchi odamning o'rnini egallaysiz.",
     "a": ["2-o'rinda", "2", "ikkinchi o'rinda", "2-o'rin"]
-  }
+  },
   {
     "id": 101,
     "q": "101. Poyga o'yinida oxirgi ishtirokchini quvib o'tsangiz, nechanchi o'ringa o'tasiz?",
@@ -1052,7 +1052,7 @@ LOGICAL_QUESTIONS = [
     "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
     "hint": "💡 Maslahat: Yupiter.",
     "a": ["yupiter", "yupiter sayyorasi"]
-  }
+  },
   {
     "id": 151,
     "q": "151. Dunyodagi eng mitti qush qaysi?",
@@ -1402,7 +1402,7 @@ LOGICAL_QUESTIONS = [
     "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
     "hint": "💡 Maslahat: 60 soniya.",
     "a": ["60", "60 soniya", "60 sekund"]
-  }
+  },
   {
     "id": 201,
     "q": "201. Qaysi hayvon eng baland bo'yli hisoblanadi?",
@@ -1752,7 +1752,7 @@ LOGICAL_QUESTIONS = [
     "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800",
     "hint": "💡 Maslahat: Bosh sahifa (Home page).",
     "a": ["bosh sahifa", "home page", "main page"]
-  }
+  },
   {
     "id": 251,
     "q": "251. Qaysi o'simlikdan shakar olinadi?",
@@ -2112,8 +2112,13 @@ def normalize_text(text: str) -> str:
     if not text:
         return ""
     text = str(text).lower().strip()
-   text = re.sub(r"[^\w\s]", "", text)
-   text = text.replace("o‘", "o").replace("g‘", "g").replace("o'", "o").replace("g'", "g")
+    
+    # Apostroflarni olib tashlash (to'g'ri tirnoq sintaksisi bilan)
+    text = re.sub(r"[‘`’'\"`]", "", text)
+    
+    # O' va G' harflarini standartlashtirish
+    text = text.replace("o‘", "o").replace("g‘", "g").replace("o'", "o").replace("g'", "g")
+    
     return text.strip()
 
 def check_answer(user_answer: str, correct_answers: list) -> bool:
