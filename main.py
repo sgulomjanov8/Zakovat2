@@ -25,8 +25,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Токен прямо в коде, чтобы избежать ошибок с Render Environment Variables
-TOKEN = "8744991351:AAGVE82fuE3k910i-Xk-GG8_qGDgYzeWQOY"
+# Новый токен прямо в коде
+TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
 
 # ----------------- FLASK WEB SERVER FOR RENDER -----------------
 app = Flask('')
@@ -88,7 +88,6 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             if not context.user_data.get("is_answering", False):
                 return
 
-            # Отправка подсказки на 80-й секунде (когда остается <= 30 сек)
             if total_seconds <= 30 and not hint_sent:
                 hint_sent = True
                 q_data = context.user_data.get("current_q")
@@ -293,7 +292,6 @@ def main():
     
     logger.info("Bot uspeshno zapushen!")
     
-    # drop_pending_updates=True очищает зависшие вебхуки и входящие очереди
     app_bot.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
