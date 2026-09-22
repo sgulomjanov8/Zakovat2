@@ -1,6 +1,7 @@
 import os
 import asyncio
 import random
+import logging
 from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
@@ -18,8 +19,15 @@ from telegram.ext import (
 # questions.py faylingizdan savollar va javobni tekshirish funksiyasi
 from questions import LOGICAL_QUESTIONS, check_answer
 
+# Logging sozlamalari (Render loglarida xatolarni aniq ko'rish uchun)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
-TOKEN = "8851685095:AAEZGYQg0VBJF62HGs70wDzCynmxoAyvWqc"
+TOKEN = os.getenv("BOT_TOKEN")
 
 # Web Server (Render'da 24/7 ishlashi uchun)
 app = Flask('')
@@ -29,7 +37,8 @@ def home():
     return "Bot faol ishlamoqda!"
 
 def run_flask():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
 
 def keep_alive():
     t = Thread(target=run_flask)
@@ -59,6 +68,10 @@ def get_count_keyboard():
 # --- START BUYRUG'I ---
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Oldingi taymer bo'lsa to'xtatamiz
+    if "timer_task" in context.user_data and context.user_data["timer_task"]:
+        context.user_data["timer_task"].cancel()
+        
     context.user_data.clear()
     await update.message.reply_text(
         "👋 **Xush kelibsiz!** O'yinni boshlash uchun kerakli **sinfni** tanlang:",
@@ -79,17 +92,19 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             if not context.user_data.get("is_answering", False):
                 return
 
-            # 80-soniyaga kelganda (yoki o'tganda) 1 marta hint (maslahat) yuborish
-            # 110-30=80 (ya'ni 80-soniya o'tganida)
+            # 80-soniya o'tganda (110 - 80 = 30s qolganda) 1 marta hint yuboriladi
             if total_seconds <= 30 and not hint_sent:
                 hint_sent = True
                 q_data = context.user_data.get("current_q")
                 if q_data and q_data.get("hint"):
-                    await context.bot.send_message(
-                        chat_id=chat_id,
-                        text=f"💡 <b>Maslahat:</b> {q_data['hint']}",
-                        parse_mode="HTML"
-                    )
+                    try:
+                        await context.bot.send_message(
+                            chat_id=chat_id,
+                            text=f"💡 <b>Maslahat:</b> {q_data['hint']}",
+                            parse_mode="HTML"
+                        )
+                    except Exception as e:
+                        logger.error(f"Hint yuborishda xatolik: {e}")
             
             mins, secs = divmod(total_seconds, 60)
             time_str = f"{mins}:{secs:02d}"
@@ -105,12 +120,21 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             )
             
             try:
-                await context.bot.edit_message_caption(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    caption=text,
-                    parse_mode="HTML"
-                )
+                # Agar savol rasmli bo'lsa edit_message_caption, aks holda edit_message_text
+                if q_data.get("image"):
+                    await context.bot.edit_message_caption(
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        caption=text,
+                        parse_mode="HTML"
+                    )
+                else:
+                    await context.bot.edit_message_text(
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        text=text,
+                        parse_mode="HTML"
+                    )
             except Exception:
                 pass
 
@@ -122,7 +146,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
                 text="⏰ <b>Vaqt tugadi!</b> Javob qabul qilinmadi.",
                 parse_mode="HTML"
             )
-            context.user_data["q_index"] += 1
+            context.user_data["q_index"] = context.user_data.get("q_index", 0) + 1
             await ask_next_question(context, chat_id)
             
     except asyncio.CancelledError:
@@ -161,22 +185,31 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
         f"⏱ <b>Qolgan vaqt:</b> 1:50"
     )
     
-    # Rasm mavjudligini tekshirish
-    if q_data.get("image"):
-        msg = await context.bot.send_photo(
-            chat_id=chat_id,
-            photo=q_data["image"],
-            caption=text,
-            parse_mode="HTML"
-        )
-    else:
+    # Savolni yuborish (rasm bormi yoki yo'q)
+    try:
+        if q_data.get("image"):
+            msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=q_data["image"],
+                caption=text,
+                parse_mode="HTML"
+            )
+        else:
+            msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=text,
+                parse_mode="HTML"
+            )
+    except Exception as e:
+        logger.error(f"Savol yuborishda xatolik (rasm xatosi bo'lishi mumkin): {e}")
+        # Agar rasm yuklanmasa, rasmsiz yuboramiz
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
             parse_mode="HTML"
         )
     
-    # Eski taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqish
+    # Oldingi taymerni to'xtatib, yangi 110 soniyalik (1:50) taymerni yoqamiz
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
@@ -187,42 +220,47 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    # Telegram'dagi soat (loading) belgisini darhol yo'qotish uchun:
     await query.answer()
     
-    # 1. Sinf tanlanganda
-    if query.data.startswith("class_"):
-        selected_class = query.data.split("_")[1]
-        context.user_data["selected_class"] = selected_class
-        
-        class_title = f"{selected_class}-sinf" if selected_class != "all" else "Barcha sinflar"
-        await query.message.edit_text(
-            f"✅ **{class_title}** tanlandi!\nEndi **savollar sonini** tanlang:",
-            reply_markup=get_count_keyboard(),
-            parse_mode="Markdown"
-        )
-        
-    # 2. Savollar soni tanlanganda
-    elif query.data.startswith("count_"):
-        count = int(query.data.split("_")[1])
-        selected_class = context.user_data.get("selected_class", "all")
-        
-        all_q = LOGICAL_QUESTIONS.copy()
-        
-        # Sinf bo'yicha filterlash
-        if selected_class != "all":
-            filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
-            if filtered_q:
-                all_q = filtered_q
+    try:
+        # 1. Sinf tanlanganda
+        if query.data.startswith("class_"):
+            selected_class = query.data.split("_")[1]
+            context.user_data["selected_class"] = selected_class
+            
+            class_title = f"{selected_class}-sinf" if selected_class != "all" else "Barcha sinflar"
+            await query.message.edit_text(
+                f"✅ **{class_title}** tanlandi!\nEndi **savollar sonini** tanlang:",
+                reply_markup=get_count_keyboard(),
+                parse_mode="Markdown"
+            )
+            
+        # 2. Savollar soni tanlanganda
+        elif query.data.startswith("count_"):
+            count = int(query.data.split("_")[1])
+            selected_class = context.user_data.get("selected_class", "all")
+            
+            all_q = LOGICAL_QUESTIONS.copy()
+            
+            # Sinf bo'yicha filterlash
+            if selected_class != "all":
+                filtered_q = [q for q in all_q if str(q.get("class", "")) == selected_class]
+                if filtered_q:
+                    all_q = filtered_q
 
-        random.shuffle(all_q)
-        
-        context.user_data["questions"] = all_q[:count]
-        context.user_data["q_index"] = 0
-        context.user_data["score"] = 0
-        context.user_data["total_q"] = min(count, len(all_q))
-        
-        await query.message.delete()
-        await ask_next_question(context, query.message.chat_id)
+            random.shuffle(all_q)
+            
+            context.user_data["questions"] = all_q[:count]
+            context.user_data["q_index"] = 0
+            context.user_data["score"] = 0
+            context.user_data["total_q"] = min(count, len(all_q))
+            
+            await query.message.delete()
+            await ask_next_question(context, query.message.chat_id)
+
+    except Exception as e:
+        logger.error(f"Tugma bosilganda xatolik: {e}")
 
 # --- JAVOB TEKSHIRISH ---
 
@@ -237,10 +275,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     context.user_data["is_answering"] = False
+    
+    # Taymerni to'xtatamiz
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
 
-    # questions.py faylidagi check_answer orqali tekshirish
+    # check_answer orqali tekshirish
     is_correct = check_answer(user_text, current_q["a"])
     
     if is_correct:
@@ -253,12 +293,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML"
         )
         
-    context.user_data["q_index"] += 1
+    context.user_data["q_index"] = context.user_data.get("q_index", 0) + 1
     await ask_next_question(context, update.message.chat_id)
 
 # --- ASOSIY ISHGA TUSHIRISH ---
 
 def main():
+    if not TOKEN:
+        logger.error("BOT_TOKEN topilmadi! Render Environment Variables yoki .env faylingizni tekshiring.")
+        return
+
     keep_alive()
     app_bot = Application.builder().token(TOKEN).build()
     
