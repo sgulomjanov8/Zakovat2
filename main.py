@@ -18,15 +18,15 @@ from telegram.ext import (
 # Импорт вопросов и функции проверки из вашего questions.py
 from questions import LOGICAL_QUESTIONS, check_answer
 
-# Настройка логирования для отслеживания ошибок в консоли Render
+# Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Токен бота (берётся из переменных Render или используется текущий рабочий)
-TOKEN = os.getenv("BOT_TOKEN", "8744991351:AAGVE82fuE3k910i-Xk-GG8_qGDgYzeWQOY")
+# Токен прямо в коде, чтобы избежать ошибок с Render Environment Variables
+TOKEN = "8744991351:AAGVE82fuE3k910i-Xk-GG8_qGDgYzeWQOY"
 
 # ----------------- FLASK WEB SERVER FOR RENDER -----------------
 app = Flask('')
@@ -47,7 +47,6 @@ def keep_alive():
 # ----------------- КЛАВИАТУРЫ И МЕНЮ -----------------
 
 def get_class_keyboard():
-    """Выбор класса (от 5 до 11) и вариант 'Aralash'"""
     keyboard = [
         [InlineKeyboardButton("5-sinf", callback_data="class_5"), InlineKeyboardButton("6-sinf", callback_data="class_6")],
         [InlineKeyboardButton("7-sinf", callback_data="class_7"), InlineKeyboardButton("8-sinf", callback_data="class_8")],
@@ -57,7 +56,6 @@ def get_class_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def get_count_keyboard():
-    """Выбор количества вопросов"""
     keyboard = [
         [InlineKeyboardButton("3 ta savol", callback_data="count_3"), InlineKeyboardButton("5 ta savol", callback_data="count_5")],
         [InlineKeyboardButton("10 ta savol", callback_data="count_10"), InlineKeyboardButton("15 ta savol", callback_data="count_15")]
@@ -67,7 +65,6 @@ def get_count_keyboard():
 # ----------------- ОБРАБОТКА /START -----------------
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Очищаем старые таймеры, если они были
     if "timer_task" in context.user_data and context.user_data["timer_task"]:
         context.user_data["timer_task"].cancel()
         
@@ -79,7 +76,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-# ----------------- ТАЙМЕР И ПОДСКАЗКА -----------------
+# ----------------- ТАЙМЕР И ПОДСКАЗКА (HINT) -----------------
 
 async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, total_seconds: int):
     try:
@@ -91,7 +88,7 @@ async def timer_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_i
             if not context.user_data.get("is_answering", False):
                 return
 
-            # Отправка подсказки (hint) на 80-й секунде (когда остается <= 30 сек)
+            # Отправка подсказки на 80-й секунде (когда остается <= 30 сек)
             if total_seconds <= 30 and not hint_sent:
                 hint_sent = True
                 q_data = context.user_data.get("current_q")
@@ -196,7 +193,7 @@ async def ask_next_question(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
                 parse_mode="HTML"
             )
     except Exception as e:
-        logger.error(f"Ошибка отправки фото: {e}")
+        logger.error(f"Ошибка отправки сообщения: {e}")
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=text,
@@ -283,23 +280,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["q_index"] = context.user_data.get("q_index", 0) + 1
     await ask_next_question(context, update.message.chat_id)
 
-# ----------------- ЗАПУСК БОТА -----------------
+# ----------------- ЗАПУСК -----------------
 
 def main():
-    # Запуск фонового веб-сервера
     keep_alive()
     
-    # Сборка приложения Telegram
     app_bot = Application.builder().token(TOKEN).build()
     
-    # Регистрация хэндлеров
     app_bot.add_handler(CommandHandler("start", start_command))
     app_bot.add_handler(CallbackQueryHandler(button_handler))
     app_bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     logger.info("Bot uspeshno zapushen!")
     
-    # drop_pending_updates=True удаляет подвисшие старые команды и сбрасывает вебхуки
+    # drop_pending_updates=True очищает зависшие вебхуки и входящие очереди
     app_bot.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
