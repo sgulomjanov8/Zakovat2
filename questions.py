@@ -3,7 +3,6 @@ import re
 from difflib import SequenceMatcher
 
 LOGICAL_QUESTIONS = [
-   [
   {
     "id": 1,
     "q": "1. Qaysi narsa ko'tarilganda tushadi, tushirilganda ko'tariladi?",
